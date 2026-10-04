@@ -1,0 +1,149 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+enum SubscriberStatus {
+  ACTIVE
+  UNSUBSCRIBED
+}
+
+model Subscriber {
+  id             String            @id @default(uuid())
+  email          String            @unique
+  name           String?
+  status         SubscriberStatus  @default(ACTIVE)
+  subscribedAt   DateTime          @default(now())
+  unsubscribedAt DateTime?
+}
+
+model BlogCategory {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  blogs       Blog[]
+}
+
+enum BlogType {
+  BLOG
+  NEWS
+}
+
+enum BlogStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model Blog {
+  id          String       @id @default(uuid())
+  title       String
+  slug        String       @unique
+  excerpt     String
+  content     String
+  coverImage  String?
+  type        BlogType
+  status      BlogStatus   @default(DRAFT)
+  tags        String[]
+  categoryId  String
+  category    BlogCategory @relation(fields: [categoryId], references: [id])
+  authorName  String?
+  publishedAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+enum CareerApplicationStatus {
+  PENDING
+  REVIEWED
+  REJECTED
+  HIRED
+}
+
+model CareerApplication {
+  id              String                   @id @default(uuid())
+  firstName       String
+  lastName        String
+  email           String
+  phone           String
+  address         String
+  city            String
+  country         String
+  expectedSalary  String
+  position        String
+  startDate       DateTime
+  resumeUrl       String
+  coverLetterUrl  String
+  status          CareerApplicationStatus  @default(PENDING)
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+}
+
+enum ContactMessageStatus {
+  NEW
+  READ
+  RESPONDED
+}
+
+model ContactMessage {
+  id        String                @id @default(uuid())
+  name      String
+  email     String
+  phone     String?
+  service   String?
+  program   String?
+  message   String
+  status    ContactMessageStatus  @default(NEW)
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+}
+
+enum ConsultationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+model Consultation {
+  id        String              @id @default(uuid())
+  name      String
+  company   String?
+  email     String
+  phone     String
+  service   String?
+  notes     String?
+  date      DateTime
+  time      String
+  meetLink  String              @default("https://meet.google.com/new")
+  status    ConsultationStatus  @default(PENDING)
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+}
+
+/// The admin's recurring weekly consultation availability — one row per
+/// day of week (0 = Sunday .. 6 = Saturday). An empty timeSlots array means
+/// unavailable that day. Read publicly by the Aramway frontend's booking
+/// calendar; only the admin can edit it.
+model AvailabilityRule {
+  id        String   @id @default(uuid())
+  dayOfWeek Int      @unique
+  timeSlots String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
