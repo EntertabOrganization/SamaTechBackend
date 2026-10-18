@@ -8,11 +8,7 @@ import { swaggerSpec, swaggerUiOptions, swaggerUiCdnHost } from "./swagger/swagg
 import { errorHandler } from "./middleware/errorHandler";
 
 import authRoutes from "./modules/auth/auth.routes";
-import adminRoutes from "./modules/admins/admins.routes";
-import subscriberRoutes from "./modules/subscribers/subscribers.routes";
-import blogCategoryRoutes from "./modules/blog-categories/blog-categories.routes";
-import blogRoutes from "./modules/blogs/blogs.routes";
-import careerRoutes from "./modules/careers/careers.routes";
+import userRoutes from "./modules/users/users.routes";
 import contactRoutes from "./modules/contact/contact.routes";
 import consultationRoutes from "./modules/consultations/consultations.routes";
 import availabilityRoutes from "./modules/availability/availability.routes";
@@ -49,11 +45,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
 
 app.use("/api/auth", authRoutes);
-app.use("/api/admins", adminRoutes);
-app.use("/api/subscribers", subscriberRoutes);
-app.use("/api/blog-categories", blogCategoryRoutes);
-app.use("/api/blogs", blogRoutes);
-app.use("/api/careers", careerRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/consultations", consultationRoutes);
 app.use("/api/availability", availabilityRoutes);
@@ -64,7 +56,7 @@ app.get("/health", (_req: Request, res: Response) => {
 
 app.get("/", (_req: Request, res: Response) => {
   res.status(200).json({
-    name: "Aramway Admin Backend API",
+    name: "SamaTechs Backend API",
     docs: "/api-docs",
     health: "/health",
   });

@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { ADMIN_EMAIL, login } from "./helpers";
+import { USER_EMAIL, login } from "./helpers";
 
 test.describe("Auth", () => {
   test("rejects invalid credentials", async ({ request }) => {
@@ -10,7 +10,7 @@ test.describe("Auth", () => {
   });
 
   test("rejects a missing email or password with 400", async ({ request }) => {
-    const res = await request.post("api/auth/login", { data: { email: ADMIN_EMAIL } });
+    const res = await request.post("api/auth/login", { data: { email: USER_EMAIL } });
     expect(res.status()).toBe(400);
   });
 
@@ -20,7 +20,7 @@ test.describe("Auth", () => {
     const me = await request.get("api/auth/me");
     expect(me.ok()).toBeTruthy();
     const meBody = await me.json();
-    expect(meBody.admin.email).toBe(ADMIN_EMAIL);
+    expect(meBody.user.email).toBe(USER_EMAIL);
 
     const logout = await request.post("api/auth/logout");
     expect(logout.ok()).toBeTruthy();
@@ -30,7 +30,7 @@ test.describe("Auth", () => {
   });
 
   test("protected routes reject unauthenticated requests", async ({ request }) => {
-    const res = await request.get("api/subscribers");
+    const res = await request.get("api/users");
     expect(res.status()).toBe(401);
   });
 });

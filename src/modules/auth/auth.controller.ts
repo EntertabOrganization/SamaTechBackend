@@ -26,21 +26,21 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(400, "email and password are required");
   }
 
-  const admin = await authService.findAdminByEmail(email);
-  if (!admin) {
+  const user = await authService.findUserByEmail(email);
+  if (!user) {
     throw new ApiError(401, "Invalid email or password");
   }
 
-  const match = await bcrypt.compare(password, admin.passwordHash);
+  const match = await bcrypt.compare(password, user.passwordHash);
   if (!match) {
     throw new ApiError(401, "Invalid email or password");
   }
 
-  const token = signToken({ id: admin.id, email: admin.email });
+  const token = signToken({ id: user.id, email: user.email });
   res.cookie(COOKIE_NAME, token, cookieOptions());
 
   res.status(200).json({
-    admin: { id: admin.id, email: admin.email, name: admin.name },
+    user: { id: user.id, email: user.email, name: user.name },
   });
 });
 
@@ -50,16 +50,16 @@ export const logout = asyncHandler(async (_req: Request, res: Response) => {
 });
 
 export const me = asyncHandler(async (req: Request, res: Response) => {
-  if (!req.admin) {
+  if (!req.user) {
     throw new ApiError(401, "Not authenticated");
   }
 
-  const admin = await authService.findAdminById(req.admin.id);
-  if (!admin) {
+  const user = await authService.findUserById(req.user.id);
+  if (!user) {
     throw new ApiError(401, "Not authenticated");
   }
 
   res.status(200).json({
-    admin: { id: admin.id, email: admin.email, name: admin.name },
+    user: { id: user.id, email: user.email, name: user.name },
   });
 });

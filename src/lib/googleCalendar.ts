@@ -11,7 +11,7 @@ import { google } from "googleapis";
  * Meet link creation for a personal Gmail account requires acting as that
  * user), obtained once via scripts/get-google-refresh-token.ts.
  *
- * No calendar invite is sent to attendees (sendUpdates: "none") — Aramway's
+ * No calendar invite is sent to attendees (sendUpdates: "none") — SamaTechs's
  * own branded emails are the single source of the meeting details; we don't
  * want Google's separate calendar-invite email arriving too.
  *

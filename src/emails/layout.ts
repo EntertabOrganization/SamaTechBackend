@@ -2,21 +2,20 @@
  * Shared HTML shell for all outbound emails — inline styles and table-based
  * layout throughout, since that's what actually renders consistently across
  * email clients (Gmail, Outlook, Apple Mail), unlike a linked stylesheet or
- * modern CSS. Mirrors the Aramway site's palette (app/globals.css: primary
- * #cc9138, ink #0c0903, cream #fbf7f4/#f5ebd6). The header logo is loaded
+ * modern CSS. Uses the SamaTechs blue and neutral palette. The header logo is loaded
  * from the live site (FRONTEND_URL), with alt text as the fallback for
  * clients that block remote images by default.
  */
 
-const FRONTEND_URL = process.env.FRONTEND_URL || "https://aramway.com";
+const FRONTEND_URL = process.env.FRONTEND_URL || "https://samatechs.com";
 
 const COLORS = {
-  primary: "#cc9138",
-  primaryDark: "#a8752a",
-  ink: "#0c0903",
+  primary: "#0078FF",
+  primaryDark: "#0B3C8A",
+  ink: "#0F1B2D",
   muted: "#666666",
-  cream: "#fbf7f4",
-  creamDeep: "#f5ebd6",
+  cream: "#F4F8FD",
+  creamDeep: "#E4ECF7",
   border: "#eae7e4",
   white: "#ffffff",
 };
@@ -64,7 +63,7 @@ export function renderEmailLayout({ preheader, heading, bodyHtml, ctaLabel, ctaU
         <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; width: 100%; background-color: ${COLORS.white}; border-radius: 16px; overflow: hidden; border: 1px solid ${COLORS.border};">
           <tr>
             <td align="center" bgcolor="${COLORS.white}" style="background-color: ${COLORS.white}; padding: 32px 24px; border-bottom: 1px solid ${COLORS.border};">
-              <img src="${FRONTEND_URL}/images/logo-footer.png" width="160" alt="ARAMWAY GROUP" style="display: block; width: 160px; max-width: 100%; height: auto; border: 0;" />
+              <img src="${FRONTEND_URL}/horizontal-logo%201.svg" width="160" alt="SAMATECHS" style="display: block; width: 160px; max-width: 100%; height: auto; border: 0;" />
             </td>
           </tr>
           <tr>
@@ -84,7 +83,7 @@ export function renderEmailLayout({ preheader, heading, bodyHtml, ctaLabel, ctaU
             <td style="padding: 28px 36px 36px;">
               <hr style="border: none; border-top: 1px solid ${COLORS.border}; margin: 0 0 20px;" />
               <p style="margin: 0; font-size: 13px; line-height: 1.6; color: ${COLORS.muted};">
-                ARAMWAY GROUP &middot; Bridging U.S. &amp; MENA Markets<br />
+                SAMATECHS &middot; Strategic Advisory<br />
                 <a href="${FRONTEND_URL}" style="color: ${COLORS.primary}; text-decoration: none;">${FRONTEND_URL.replace(/^https?:\/\//, "")}</a>
               </p>
             </td>

@@ -4,7 +4,7 @@ import nodemailer, { Transporter } from "nodemailer";
  * Generic SMTP mailer — works with any provider (Gmail, SES, SendGrid,
  * Mailgun, ...) since credentials are supplied via env, not a vendor SDK.
  * Emails are always best-effort: nothing in the request/response cycle that
- * triggers a send (subscribing, publishing a blog, booking a consultation)
+ * triggers a consultation confirmation or staff notification
  * should ever fail because the mail server is unreachable or misconfigured.
  */
 
@@ -48,7 +48,7 @@ export interface SendMailInput {
 }
 
 export async function sendMail({ to, subject, html }: SendMailInput): Promise<void> {
-  const from = process.env.EMAIL_FROM || "ARAMWAY GROUP <no-reply@aramway.com>";
+  const from = process.env.EMAIL_FROM || "SAMATECHS <no-reply@samatechs.com>";
   const client = getTransporter();
 
   if (!client) {

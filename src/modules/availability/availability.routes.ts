@@ -9,7 +9,7 @@ const router = Router();
  * /availability:
  *   get:
  *     tags: [Availability]
- *     summary: Get the admin's recurring weekly consultation availability (public)
+ *     summary: Get the user's recurring weekly consultation availability (public)
  *     responses:
  *       200:
  *         description: Always exactly 7 entries, one per day of week (0=Sunday..6=Saturday)
@@ -21,7 +21,7 @@ router.get("/", controller.getWeeklyAvailability);
  * /availability:
  *   put:
  *     tags: [Availability]
- *     summary: Replace the admin's recurring weekly consultation availability
+ *     summary: Replace the user's recurring weekly consultation availability
  *     security:
  *       - cookieAuth: []
  *     requestBody:

@@ -1,17 +1,17 @@
 import { Router } from "express";
 import { authMiddleware } from "../../middleware/auth.middleware";
-import * as controller from "./admins.controller";
+import * as controller from "./users.controller";
 
 const router = Router();
 router.use(authMiddleware);
 
 /**
  * @openapi
- * /admins:
+ * /users:
  *   post:
- *     tags: [Admins]
- *     summary: Create a new dashboard admin user
- *     description: Grants another user login access to the admin dashboard. Requires an existing authenticated admin.
+ *     tags: [User]
+ *     summary: Create a new dashboard user
+ *     description: Grants another user login access to the dashboard. Requires an existing authenticated user.
  *     security:
  *       - cookieAuth: []
  *     requestBody:
@@ -27,7 +27,7 @@ router.use(authMiddleware);
  *               name: { type: string }
  *     responses:
  *       201:
- *         description: Admin created
+ *         description: User created
  *       400:
  *         description: Missing required fields or password too short
  *         content:
@@ -39,19 +39,19 @@ router.use(authMiddleware);
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
  *       409:
- *         description: An admin with this email already exists
+ *         description: A user with this email already exists
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
  */
-router.post("/", controller.createAdmin);
+router.post("/", controller.createUser);
 
 /**
  * @openapi
- * /admins:
+ * /users:
  *   get:
- *     tags: [Admins]
- *     summary: List dashboard admin users
+ *     tags: [User]
+ *     summary: List dashboard users
  *     security:
  *       - cookieAuth: []
  *     parameters:
@@ -63,13 +63,13 @@ router.post("/", controller.createAdmin);
  *         schema: { type: integer, default: 20 }
  *     responses:
  *       200:
- *         description: List of admins
+ *         description: List of users
  *       401:
  *         description: Not authenticated
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
  */
-router.get("/", controller.listAdmins);
+router.get("/", controller.listUsers);
 
 export default router;

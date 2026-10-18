@@ -55,7 +55,7 @@ export function consultationStaffNotificationEmail(params: {
     preheader: `${params.name} just booked a consultation for ${formattedDate} at ${params.time}.`,
     heading: "New consultation booking 📅",
     bodyHtml: `
-      <p style="margin: 0 0 20px;">A new consultation was just booked on ARAMWAY GROUP. Details below:</p>
+      <p style="margin: 0 0 20px;">A new consultation was just booked on SAMATECHS. Details below:</p>
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
              style="background-color: #f9f3e7; border: 1px solid #f5ebd6; border-radius: 12px;">
         <tr>

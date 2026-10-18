@@ -1,9 +1,9 @@
 import prisma from "../../lib/prisma";
 
-export const findAdminByEmail = (email: string) => {
-  return prisma.admin.findUnique({ where: { email } });
+export const findUserByEmail = (email: string) => {
+  return prisma.user.findUnique({ where: { email } });
 };
 
-export const findAdminById = (id: string) => {
-  return prisma.admin.findUnique({ where: { id } });
+export const findUserById = (id: string) => {
+  return prisma.user.findUnique({ where: { id } });
 };

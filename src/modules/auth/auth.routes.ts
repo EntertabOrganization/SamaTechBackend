@@ -9,8 +9,8 @@ const router = Router();
  * /auth/login:
  *   post:
  *     tags: [Auth]
- *     summary: Admin login
- *     description: Verifies admin credentials and sets an httpOnly JWT cookie named `token`.
+ *     summary: User login
+ *     description: Verifies user credentials and sets an httpOnly JWT cookie named `token`.
  *     requestBody:
  *       required: true
  *       content:
@@ -33,7 +33,7 @@ const router = Router();
  *             schema:
  *               type: object
  *               properties:
- *                 admin:
+ *                 user:
  *                   type: object
  *                   properties:
  *                     id: { type: string }
@@ -57,7 +57,7 @@ router.post("/login", authController.login);
  * /auth/logout:
  *   post:
  *     tags: [Auth]
- *     summary: Admin logout
+ *     summary: User logout
  *     description: Clears the httpOnly JWT cookie.
  *     security:
  *       - cookieAuth: []
@@ -83,19 +83,19 @@ router.post("/logout", authMiddleware, authController.logout);
  * /auth/me:
  *   get:
  *     tags: [Auth]
- *     summary: Get current admin
- *     description: Returns the currently authenticated admin.
+ *     summary: Get current user
+ *     description: Returns the currently authenticated user.
  *     security:
  *       - cookieAuth: []
  *     responses:
  *       200:
- *         description: Current admin
+ *         description: Current user
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 admin:
+ *                 user:
  *                   type: object
  *                   properties:
  *                     id: { type: string }

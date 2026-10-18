@@ -9,7 +9,7 @@
  *   2. APIs & Services > Library > enable the "Google Calendar API".
  *   3. APIs & Services > Credentials > Create Credentials > OAuth client ID
  *      > Application type "Desktop app". Copy the Client ID and Client
- *      Secret into AramwayBackend/.env as GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET.
+ *      Secret into SamaTechBackend/.env as GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET.
  *   4. If prompted to configure an OAuth consent screen first, choose
  *      "External", fill in the required fields, and add the Gmail account
  *      you'll authorize below as a "test user" (this keeps the app out of
@@ -19,7 +19,7 @@
  *   - Opens a URL for you to visit and sign in with the Gmail account that
  *     should own the meetings (felmola13@gmail.com).
  *   - After you approve, paste the resulting GOOGLE_REFRESH_TOKEN line into
- *     AramwayBackend/.env.
+ *     SamaTechBackend/.env.
  */
 import "dotenv/config";
 import http from "http";
@@ -32,7 +32,7 @@ async function main() {
   const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = process.env;
   if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
     console.error(
-      "Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in AramwayBackend/.env first " +
+      "Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in SamaTechBackend/.env first " +
         "(from a Google Cloud OAuth 'Desktop app' client) — see the comment at the top of this script."
     );
     process.exit(1);
@@ -87,7 +87,7 @@ async function main() {
     process.exit(1);
   }
 
-  console.log("\nSuccess! Add this line to AramwayBackend/.env:\n");
+  console.log("\nSuccess! Add this line to SamaTechBackend/.env:\n");
   console.log(`GOOGLE_REFRESH_TOKEN=${tokens.refresh_token}\n`);
 }
 

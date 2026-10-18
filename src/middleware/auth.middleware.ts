@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { verifyToken } from "../utils/jwt";
 
-export interface AdminPayload {
+export interface UserPayload {
   id: string;
   email: string;
 }
@@ -10,14 +10,14 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
-      admin?: AdminPayload;
+      user?: UserPayload;
     }
   }
 }
 
 /**
  * Reads the httpOnly `token` cookie, verifies the JWT, and attaches
- * `req.admin = { id, email }`. Responds 401 if missing/invalid.
+ * `req.user = { id, email }`. Responds 401 if missing/invalid.
  */
 export const authMiddleware = (
   req: Request,
@@ -33,7 +33,7 @@ export const authMiddleware = (
 
   try {
     const payload = verifyToken(token);
-    req.admin = { id: payload.id, email: payload.email };
+    req.user = { id: payload.id, email: payload.email };
     next();
   } catch (err) {
     res.status(401).json({ error: "Invalid or expired token" });

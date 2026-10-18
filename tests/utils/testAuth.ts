@@ -1,13 +1,13 @@
 import jwt from "jsonwebtoken";
 
-export interface TestAdmin {
+export interface TestUser {
   id: string;
   email: string;
 }
 
-export const TEST_ADMIN: TestAdmin = {
+export const TEST_USER: TestUser = {
   id: "11111111-1111-1111-1111-111111111111",
-  email: "admin@example.com",
+  email: "user@example.com",
 };
 
 /**
@@ -15,8 +15,8 @@ export const TEST_ADMIN: TestAdmin = {
  * (see jest.setup.ts) and returns a `Cookie` header string that can be
  * passed to supertest's `.set('Cookie', ...)`.
  */
-export const authCookie = (admin: TestAdmin = TEST_ADMIN): string => {
-  const token = jwt.sign(admin, process.env.JWT_SECRET as string, {
+export const authCookie = (user: TestUser = TEST_USER): string => {
+  const token = jwt.sign(user, process.env.JWT_SECRET as string, {
     expiresIn: "7d",
   });
   return `token=${token}`;

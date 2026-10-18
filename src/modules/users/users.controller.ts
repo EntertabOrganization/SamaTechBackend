@@ -2,9 +2,9 @@ import { Request, Response } from "express";
 import { asyncHandler } from "../../utils/asyncHandler";
 import { ApiError } from "../../utils/ApiError";
 import { getPagination, buildPaginatedResult } from "../../utils/pagination";
-import * as service from "./admins.service";
+import * as service from "./users.service";
 
-export const createAdmin = asyncHandler(async (req: Request, res: Response) => {
+export const createUser = asyncHandler(async (req: Request, res: Response) => {
   const { email, password, name } = req.body ?? {};
 
   if (!email || !password) {
@@ -15,18 +15,18 @@ export const createAdmin = asyncHandler(async (req: Request, res: Response) => {
   }
 
   try {
-    const admin = await service.createAdmin({ email, password, name });
-    res.status(201).json(admin);
+    const user = await service.createUser({ email, password, name });
+    res.status(201).json(user);
   } catch (err: any) {
     if (err?.code === "P2002") {
-      throw new ApiError(409, "An admin with this email already exists");
+      throw new ApiError(409, "A user with this email already exists");
     }
     throw err;
   }
 });
 
-export const listAdmins = asyncHandler(async (req: Request, res: Response) => {
+export const listUsers = asyncHandler(async (req: Request, res: Response) => {
   const { page, limit, skip } = getPagination(req);
-  const [data, total] = await service.listAdmins({ skip, limit });
+  const [data, total] = await service.listUsers({ skip, limit });
   res.status(200).json(buildPaginatedResult(data, total, page, limit));
 });

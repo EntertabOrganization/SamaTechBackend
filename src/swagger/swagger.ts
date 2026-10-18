@@ -5,12 +5,11 @@ const options: swaggerJSDoc.Options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "Aramway Admin Backend API",
+      title: "SamaTechs Backend API",
       version: "1.0.0",
       description:
-        "Admin backend API for the Aramway business-consultancy marketing site. " +
-        "Handles newsletter subscribers, blog/news content, career applications, " +
-        "contact-us messages, and consultation bookings.",
+        "SamaTechs backend API for authentication, user management, contact messages, " +
+        "consultation bookings, and weekly availability.",
     },
     servers: [
       {

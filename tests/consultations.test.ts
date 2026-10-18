@@ -158,7 +158,7 @@ describe("Consultations module", () => {
       expect(prismaMock.consultation.create).not.toHaveBeenCalled();
     });
 
-    it("returns 409 when the day/time isn't in the admin's availability", async () => {
+    it("returns 409 when the day/time isn't in the user's availability", async () => {
       prismaMock.availabilityRule.findUnique.mockResolvedValue(null);
 
       const res = await request(app).post("/api/consultations").send({

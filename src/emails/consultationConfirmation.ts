@@ -18,7 +18,7 @@ export function consultationConfirmationEmail(params: {
   meetLink: string;
   service?: string | null;
 }): { subject: string; html: string } {
-  const subject = "Your ARAMWAY GROUP consultation is confirmed";
+  const subject = "Your SAMATECHS consultation is confirmed";
   const name = escapeHtml(params.name);
   const formattedDate = formatDate(params.date);
   const service = params.service ? escapeHtml(params.service) : null;
@@ -29,7 +29,7 @@ export function consultationConfirmationEmail(params: {
     bodyHtml: `
       <p style="margin: 0 0 16px;">Hi ${name},</p>
       <p style="margin: 0 0 20px;">
-        Thank you for booking a consultation with ARAMWAY GROUP. Here are your details:
+        Thank you for booking a consultation with SAMATECHS. Here are your details:
       </p>
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
              style="background-color: #f9f3e7; border: 1px solid #f5ebd6; border-radius: 12px; margin-bottom: 20px;">

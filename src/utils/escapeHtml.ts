@@ -1,7 +1,7 @@
 /**
  * Escapes text for safe interpolation into raw HTML strings — used by the
  * email templates, which build HTML manually (no JSX auto-escaping) from
- * admin-authored fields like blog titles/excerpts.
+ * user-provided consultation details.
  */
 export function escapeHtml(value: string): string {
   return value

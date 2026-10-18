@@ -60,7 +60,7 @@ export const createConsultation = asyncHandler(
     }
 
     const meetLink = await createMeetLink({
-      summary: `Aramway consultation with ${name}`,
+      summary: `SamaTechs consultation with ${name}`,
       description: svc ? `Service: ${svc}` : undefined,
       startTime: slotStart ?? parsedDate,
     });
@@ -106,7 +106,7 @@ export const createConsultation = asyncHandler(
   }
 );
 
-/** Public — the Aramway booking calendar checks this before letting a user pick a time. */
+/** Public — the SamaTechs booking calendar checks this before letting a user pick a time. */
 export const getBookedTimes = asyncHandler(async (req: Request, res: Response) => {
   const dateQuery = req.query.date as string | undefined;
   if (!dateQuery) {

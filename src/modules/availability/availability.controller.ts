@@ -24,13 +24,13 @@ function isValidDaysPayload(body: unknown): body is service.DayAvailability[] {
   });
 }
 
-/** Public — the Aramway booking calendar reads this to know which days/times are open. */
+/** Public — the SamaTechs booking calendar reads this to know which days/times are open. */
 export const getWeeklyAvailability = asyncHandler(async (_req: Request, res: Response) => {
   const days = await service.listWeeklyAvailability();
   res.status(200).json({ data: days });
 });
 
-/** Protected — the admin sets their recurring weekly schedule from the dashboard. */
+/** Protected — the user sets their recurring weekly schedule from the dashboard. */
 export const updateWeeklyAvailability = asyncHandler(async (req: Request, res: Response) => {
   const body = req.body?.days;
 
