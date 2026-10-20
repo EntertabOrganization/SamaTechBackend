@@ -4,6 +4,8 @@ import prisma from "../../lib/prisma";
 export interface CreateContactMessageInput {
   name: string;
   email: string;
+  organization?: string;
+  jobTitle?: string;
   phone?: string;
   service?: string;
   program?: string;

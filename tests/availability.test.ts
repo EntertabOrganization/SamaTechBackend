@@ -39,6 +39,17 @@ describe("Availability module", () => {
       expect(res.status).toBe(400);
     });
 
+    it("returns 400 when a time slot isn't a time", async () => {
+      const days = Array.from({ length: 7 }, (_, dayOfWeek) => ({
+        dayOfWeek,
+        timeSlots: dayOfWeek === 0 ? ["morning"] : [],
+      }));
+      const res = await request(app).put("/api/availability").set("Cookie", authCookie()).send({ days });
+
+      expect(res.status).toBe(400);
+      expect(prismaMock.$transaction).not.toHaveBeenCalled();
+    });
+
     it("replaces the weekly schedule with a valid cookie", async () => {
       const days = Array.from({ length: 7 }, (_, dayOfWeek) => ({
         dayOfWeek,

@@ -2,8 +2,15 @@ import { Request, Response } from "express";
 import { ConsultationStatus } from "@prisma/client";
 import { asyncHandler } from "../../utils/asyncHandler";
 import { ApiError } from "../../utils/ApiError";
-import { easternSlotToUtc } from "../../utils/easternTime";
+import { CONSULTATION_DURATION_MINUTES, slotToUtc } from "../../utils/consultationTime";
 import { getPagination, buildPaginatedResult } from "../../utils/pagination";
+import {
+  MAX_LENGTH,
+  optionalText,
+  parseCalendarDate,
+  requiredEmail,
+  requiredText,
+} from "../../utils/validation";
 import { sendMail } from "../../lib/mailer";
 import { consultationConfirmationEmail } from "../../emails/consultationConfirmation";
 import { consultationStaffNotificationEmail } from "../../emails/consultationStaffNotification";
@@ -20,28 +27,17 @@ const VALID_STATUSES: ConsultationStatus[] = [
 
 export const createConsultation = asyncHandler(
   async (req: Request, res: Response) => {
-    const {
-      name,
-      company,
-      email,
-      phone,
-      service: svc,
-      notes,
-      date,
-      time,
-    } = req.body ?? {};
+    const body = req.body ?? {};
+    const name = requiredText(body, "name");
+    const email = requiredEmail(body);
+    const company = optionalText(body, "company");
+    const phone = optionalText(body, "phone", 50);
+    const svc = optionalText(body, "service");
+    const notes = optionalText(body, "notes", MAX_LENGTH.long);
+    const date = requiredText(body, "date", 10);
+    const time = requiredText(body, "time", 20);
 
-    if (!name || !email || !phone || !date || !time) {
-      throw new ApiError(
-        400,
-        "name, email, phone, date, and time are required"
-      );
-    }
-
-    const parsedDate = new Date(date);
-    if (isNaN(parsedDate.getTime())) {
-      throw new ApiError(400, "date must be a valid date");
-    }
+    const parsedDate = parseCalendarDate(date);
 
     const dayOfWeek = parsedDate.getUTCDay();
     const rule = await availabilityService.getRuleByDayOfWeek(dayOfWeek);
@@ -49,7 +45,7 @@ export const createConsultation = asyncHandler(
       throw new ApiError(409, "That day/time is not available for consultations");
     }
 
-    const slotStart = easternSlotToUtc(parsedDate, time);
+    const slotStart = slotToUtc(parsedDate, time);
     if (slotStart && slotStart.getTime() <= Date.now()) {
       throw new ApiError(409, "That time slot has already passed — please pick a future time");
     }
@@ -63,6 +59,7 @@ export const createConsultation = asyncHandler(
       summary: `SamaTechs consultation with ${name}`,
       description: svc ? `Service: ${svc}` : undefined,
       startTime: slotStart ?? parsedDate,
+      durationMinutes: CONSULTATION_DURATION_MINUTES,
     });
 
     const consultation = await service.createConsultation({
@@ -101,7 +98,12 @@ export const createConsultation = asyncHandler(
         time: consultation.time,
         meetLink: consultation.meetLink,
       });
-      void sendMail({ to: notifyEmail, subject: staffEmail.subject, html: staffEmail.html });
+      void sendMail({
+        to: notifyEmail,
+        subject: staffEmail.subject,
+        html: staffEmail.html,
+        replyTo: consultation.email,
+      });
     }
   }
 );
@@ -112,10 +114,7 @@ export const getBookedTimes = asyncHandler(async (req: Request, res: Response) =
   if (!dateQuery) {
     throw new ApiError(400, "date query parameter is required");
   }
-  const parsedDate = new Date(dateQuery);
-  if (isNaN(parsedDate.getTime())) {
-    throw new ApiError(400, "date must be a valid date");
-  }
+  const parsedDate = parseCalendarDate(dateQuery);
 
   const bookedTimes = await service.listBookedTimesForDate(parsedDate);
   res.status(200).json({ data: bookedTimes });

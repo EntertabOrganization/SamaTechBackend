@@ -158,6 +158,47 @@ describe("Consultations module", () => {
       expect(prismaMock.consultation.create).not.toHaveBeenCalled();
     });
 
+    it("books from the website form without a phone number", async () => {
+      prismaMock.availabilityRule.findUnique.mockResolvedValue({
+        id: "rule-0",
+        dayOfWeek: 0,
+        timeSlots: [CONSULTATION.time],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as any);
+      prismaMock.consultation.findMany.mockResolvedValue([]);
+      prismaMock.consultation.create.mockResolvedValue({ ...CONSULTATION, phone: null } as any);
+
+      const res = await request(app).post("/api/consultations").send({
+        name: CONSULTATION.name,
+        email: CONSULTATION.email,
+        company: "Acme",
+        notes: "Market entry",
+        date: "2099-02-01",
+        time: CONSULTATION.time,
+      });
+
+      expect(res.status).toBe(201);
+      expect(prismaMock.consultation.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ phone: undefined, company: "Acme", notes: "Market entry" }),
+        })
+      );
+    });
+
+    it("returns 400 for a date that isn't YYYY-MM-DD or doesn't exist", async () => {
+      for (const date of ["01/02/2099", "2099-02-30", "not-a-date"]) {
+        const res = await request(app).post("/api/consultations").send({
+          name: CONSULTATION.name,
+          email: CONSULTATION.email,
+          date,
+          time: CONSULTATION.time,
+        });
+        expect(res.status).toBe(400);
+      }
+      expect(prismaMock.consultation.create).not.toHaveBeenCalled();
+    });
+
     it("returns 409 when the day/time isn't in the user's availability", async () => {
       prismaMock.availabilityRule.findUnique.mockResolvedValue(null);
 
@@ -173,7 +214,7 @@ describe("Consultations module", () => {
       expect(prismaMock.consultation.create).not.toHaveBeenCalled();
     });
 
-    it("returns 409 when the slot has already passed in Eastern Time", async () => {
+    it("returns 409 when the slot has already passed", async () => {
       prismaMock.availabilityRule.findUnique.mockResolvedValue({
         id: "rule-0",
         dayOfWeek: 0,

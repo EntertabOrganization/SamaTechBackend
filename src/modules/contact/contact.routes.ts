@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { authMiddleware } from "../../middleware/auth.middleware";
+import { publicFormRateLimit } from "../../middleware/rateLimit.middleware";
 import * as controller from "./contact.controller";
 
 const router = Router();
@@ -18,22 +19,29 @@ const router = Router();
  *             type: object
  *             required: [name, email, message]
  *             properties:
- *               name: { type: string }
+ *               name: { type: string, maxLength: 200 }
  *               email: { type: string, format: email }
- *               phone: { type: string }
- *               service: { type: string }
- *               program: { type: string }
- *               message: { type: string }
+ *               organization: { type: string, maxLength: 200 }
+ *               jobTitle: { type: string, maxLength: 200 }
+ *               phone: { type: string, maxLength: 50 }
+ *               service: { type: string, maxLength: 200, description: Area of interest }
+ *               program: { type: string, maxLength: 200 }
+ *               message: { type: string, maxLength: 5000 }
  *     responses:
  *       201:
- *         description: Message submitted
+ *         description: Message submitted; staff are notified by email when CONTACT_NOTIFY_EMAIL is set
  *       400:
- *         description: Missing required fields
+ *         description: Missing or invalid fields
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
+ *       429:
+ *         description: Too many submissions from this client
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
  */
-router.post("/", controller.createContactMessage);
+router.post("/", publicFormRateLimit, controller.createContactMessage);
 
 /**
  * @openapi

@@ -5,7 +5,7 @@ export interface CreateConsultationInput {
   name: string;
   company?: string;
   email: string;
-  phone: string;
+  phone?: string;
   service?: string;
   notes?: string;
   date: Date;

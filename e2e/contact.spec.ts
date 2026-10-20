@@ -6,11 +6,19 @@ test.describe("Contact messages API", () => {
     const email = `e2e-api-contact.${Date.now()}@example.com`;
 
     const createRes = await request.post("api/contact", {
-      data: { name: "API Tester", email, message: "Hello from the API e2e suite." },
+      data: {
+        name: "API Tester",
+        email,
+        organization: "Testland Holdings",
+        jobTitle: "QA Lead",
+        service: "Not sure yet",
+        message: "Hello from the API e2e suite.",
+      },
     });
     expect(createRes.status()).toBe(201);
     const created = await createRes.json();
     expect(created.status).toBe("NEW");
+    expect(created.organization).toBe("Testland Holdings");
 
     await login(request);
 

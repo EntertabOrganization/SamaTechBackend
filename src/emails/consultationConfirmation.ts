@@ -1,5 +1,6 @@
 import { renderEmailLayout } from "./layout";
 import { escapeHtml } from "../utils/escapeHtml";
+import { timeZoneLabel } from "../utils/consultationTime";
 
 function formatDate(date: Date): string {
   return date.toLocaleDateString("en-US", {
@@ -18,13 +19,14 @@ export function consultationConfirmationEmail(params: {
   meetLink: string;
   service?: string | null;
 }): { subject: string; html: string } {
-  const subject = "Your SAMATECHS consultation is confirmed";
+  const subject = "Your SAMATECHS consultation is booked";
   const name = escapeHtml(params.name);
   const formattedDate = formatDate(params.date);
+  const formattedTime = `${escapeHtml(params.time)} (${timeZoneLabel(params.date)})`;
   const service = params.service ? escapeHtml(params.service) : null;
 
   const html = renderEmailLayout({
-    preheader: `Your consultation is booked for ${formattedDate} at ${params.time}.`,
+    preheader: `Your consultation is booked for ${formattedDate} at ${formattedTime}.`,
     heading: "Your consultation is booked ✅",
     bodyHtml: `
       <p style="margin: 0 0 16px;">Hi ${name},</p>
@@ -32,30 +34,30 @@ export function consultationConfirmationEmail(params: {
         Thank you for booking a consultation with SAMATECHS. Here are your details:
       </p>
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
-             style="background-color: #f9f3e7; border: 1px solid #f5ebd6; border-radius: 12px; margin-bottom: 20px;">
+             style="background-color: #F4F8FD; border: 1px solid #E4ECF7; border-radius: 12px; margin-bottom: 20px;">
         <tr>
           <td style="padding: 20px 24px;">
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
               <tr>
                 <td style="padding: 6px 0; font-size: 14px; color: #666666; width: 110px;">Date</td>
-                <td style="padding: 6px 0; font-size: 14px; color: #0c0903; font-weight: 600;">${formattedDate}</td>
+                <td style="padding: 6px 0; font-size: 14px; color: #0F1B2D; font-weight: 600;">${formattedDate}</td>
               </tr>
               <tr>
                 <td style="padding: 6px 0; font-size: 14px; color: #666666;">Time</td>
-                <td style="padding: 6px 0; font-size: 14px; color: #0c0903; font-weight: 600;">${params.time}</td>
+                <td style="padding: 6px 0; font-size: 14px; color: #0F1B2D; font-weight: 600;">${formattedTime}</td>
               </tr>
               ${
                 service
                   ? `<tr>
                 <td style="padding: 6px 0; font-size: 14px; color: #666666;">Service</td>
-                <td style="padding: 6px 0; font-size: 14px; color: #0c0903; font-weight: 600;">${service}</td>
+                <td style="padding: 6px 0; font-size: 14px; color: #0F1B2D; font-weight: 600;">${service}</td>
               </tr>`
                   : ""
               }
               <tr>
                 <td style="padding: 6px 0; font-size: 14px; color: #666666;">Meeting Link</td>
                 <td style="padding: 6px 0; font-size: 14px;">
-                  <a href="${params.meetLink}" style="color: #cc9138; font-weight: 600; text-decoration: none;">${params.meetLink}</a>
+                  <a href="${params.meetLink}" style="color: #0078FF; font-weight: 600; text-decoration: none;">${params.meetLink}</a>
                 </td>
               </tr>
             </table>

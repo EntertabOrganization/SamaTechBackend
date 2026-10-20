@@ -1,6 +1,13 @@
 import { test, expect } from "@playwright/test";
 import { login } from "./helpers";
 
+/** A Sunday at least a week ahead — open in the seeded Sunday-to-Thursday schedule. */
+function upcomingSunday(): string {
+  const date = new Date();
+  date.setUTCDate(date.getUTCDate() + 7 + ((7 - date.getUTCDay()) % 7));
+  return date.toISOString().slice(0, 10);
+}
+
 test.describe("Consultations API", () => {
   test("public create, then protected list/update/delete round-trip", async ({ request }) => {
     const email = `e2e-api-consultation.${Date.now()}@example.com`;
@@ -9,9 +16,9 @@ test.describe("Consultations API", () => {
       data: {
         name: "API Tester",
         email,
-        phone: "+1-555-000-4444",
-        country: "Testland",
-        date: "2026-06-15",
+        company: "Testland Holdings",
+        notes: "Booked from the API e2e suite.",
+        date: upcomingSunday(),
         time: "10:00",
       },
     });
@@ -40,8 +47,6 @@ test.describe("Consultations API", () => {
       data: {
         name: "Bad Date",
         email: `e2e-baddate.${Date.now()}@example.com`,
-        phone: "+1-555-000-5555",
-        country: "Testland",
         date: "not-a-date",
         time: "10:00",
       },

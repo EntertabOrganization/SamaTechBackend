@@ -2,11 +2,19 @@ import request from "supertest";
 import app from "../src/app";
 import { prismaMock } from "./utils/prismaMock";
 import { authCookie } from "./utils/testAuth";
+import { sendMail } from "../src/lib/mailer";
+
+jest.mock("../src/lib/mailer");
+const sendMailMock = sendMail as jest.Mock;
+
+const flushMicrotasks = () => new Promise((resolve) => setImmediate(resolve));
 
 const MESSAGE = {
   id: "77777777-7777-7777-7777-777777777777",
   name: "John Smith",
   email: "john@example.com",
+  organization: null,
+  jobTitle: null,
   phone: null,
   service: null,
   program: null,
@@ -34,6 +42,71 @@ describe("Contact module", () => {
     it("returns 400 when required fields are missing", async () => {
       const res = await request(app).post("/api/contact").send({});
       expect(res.status).toBe(400);
+      expect(prismaMock.contactMessage.create).not.toHaveBeenCalled();
+    });
+
+    it("stores the website form's fields, trimmed, and notifies staff", async () => {
+      const originalNotifyEmail = process.env.CONTACT_NOTIFY_EMAIL;
+      process.env.CONTACT_NOTIFY_EMAIL = "staff@example.com";
+      const stored = {
+        ...MESSAGE,
+        organization: "Acme",
+        jobTitle: "CFO",
+        service: "Not sure yet",
+      };
+      prismaMock.contactMessage.create.mockResolvedValue(stored as any);
+
+      const res = await request(app).post("/api/contact").send({
+        name: `  ${MESSAGE.name}  `,
+        email: MESSAGE.email,
+        organization: "Acme",
+        jobTitle: "CFO",
+        service: "Not sure yet",
+        message: MESSAGE.message,
+        privacy: "on",
+      });
+
+      expect(res.status).toBe(201);
+      expect(prismaMock.contactMessage.create).toHaveBeenCalledWith({
+        data: {
+          name: MESSAGE.name,
+          email: MESSAGE.email,
+          organization: "Acme",
+          jobTitle: "CFO",
+          phone: undefined,
+          service: "Not sure yet",
+          program: undefined,
+          message: MESSAGE.message,
+        },
+      });
+
+      await flushMicrotasks();
+      expect(sendMailMock).toHaveBeenCalledWith(
+        expect.objectContaining({ to: "staff@example.com", replyTo: MESSAGE.email })
+      );
+
+      process.env.CONTACT_NOTIFY_EMAIL = originalNotifyEmail;
+    });
+
+    it("returns 400 for an invalid email address", async () => {
+      const res = await request(app)
+        .post("/api/contact")
+        .send({ name: MESSAGE.name, email: "not-an-email", message: MESSAGE.message });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatch(/email/);
+      expect(prismaMock.contactMessage.create).not.toHaveBeenCalled();
+    });
+
+    it("returns 400 for a blank or over-long message", async () => {
+      const blank = await request(app)
+        .post("/api/contact")
+        .send({ name: MESSAGE.name, email: MESSAGE.email, message: "   " });
+      expect(blank.status).toBe(400);
+
+      const long = await request(app)
+        .post("/api/contact")
+        .send({ name: MESSAGE.name, email: MESSAGE.email, message: "x".repeat(5001) });
+      expect(long.status).toBe(400);
       expect(prismaMock.contactMessage.create).not.toHaveBeenCalled();
     });
   });

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../../utils/asyncHandler";
 import { ApiError } from "../../utils/ApiError";
+import { parseTimeLabel } from "../../utils/consultationTime";
 import * as service from "./availability.service";
 
 function isValidDaysPayload(body: unknown): body is service.DayAvailability[] {
@@ -15,7 +16,7 @@ function isValidDaysPayload(body: unknown): body is service.DayAvailability[] {
       entry.dayOfWeek > 6 ||
       seenDays.has(entry.dayOfWeek) ||
       !Array.isArray(entry.timeSlots) ||
-      !entry.timeSlots.every((slot: unknown) => typeof slot === "string")
+      !entry.timeSlots.every((slot: unknown) => typeof slot === "string" && parseTimeLabel(slot) !== null)
     ) {
       return false;
     }
@@ -37,7 +38,7 @@ export const updateWeeklyAvailability = asyncHandler(async (req: Request, res: R
   if (!isValidDaysPayload(body)) {
     throw new ApiError(
       400,
-      "days must be an array of exactly 7 entries, one per dayOfWeek (0-6), each with a timeSlots string array"
+      "days must be an array of exactly 7 entries, one per dayOfWeek (0-6), each with a timeSlots array of times such as \"09:00\" or \"02:30 PM\""
     );
   }
 

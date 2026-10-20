@@ -45,9 +45,11 @@ export interface SendMailInput {
   to: string | string[];
   subject: string;
   html: string;
+  /** Lets staff answer a visitor straight from the notification email. */
+  replyTo?: string;
 }
 
-export async function sendMail({ to, subject, html }: SendMailInput): Promise<void> {
+export async function sendMail({ to, subject, html, replyTo }: SendMailInput): Promise<void> {
   const from = process.env.EMAIL_FROM || "SAMATECHS <no-reply@samatechs.com>";
   const client = getTransporter();
 
@@ -57,7 +59,7 @@ export async function sendMail({ to, subject, html }: SendMailInput): Promise<vo
   }
 
   try {
-    const info = await client.sendMail({ from, to, subject, html });
+    const info = await client.sendMail({ from, to, subject, html, replyTo });
     console.log(`[mailer] sent "${subject}" to ${to} (messageId=${info.messageId})`);
   } catch (err) {
     console.error(`[mailer] failed to send "${subject}" to ${to}:`, err);

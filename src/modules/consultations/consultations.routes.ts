@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { authMiddleware } from "../../middleware/auth.middleware";
+import { publicFormRateLimit } from "../../middleware/rateLimit.middleware";
 import * as controller from "./consultations.controller";
 
 const router = Router();
@@ -16,26 +17,39 @@ const router = Router();
  *         application/json:
  *           schema:
  *             type: object
- *             required: [name, email, phone, date, time]
+ *             required: [name, email, date, time]
  *             properties:
- *               name: { type: string }
- *               company: { type: string }
+ *               name: { type: string, maxLength: 200 }
+ *               company: { type: string, maxLength: 200 }
  *               email: { type: string, format: email }
- *               phone: { type: string }
- *               service: { type: string }
- *               notes: { type: string }
- *               date: { type: string, format: date }
- *               time: { type: string }
+ *               phone: { type: string, maxLength: 50 }
+ *               service: { type: string, maxLength: 200 }
+ *               notes: { type: string, maxLength: 5000 }
+ *               date: { type: string, format: date, example: "2026-11-01" }
+ *               time:
+ *                 type: string
+ *                 example: "10:00"
+ *                 description: One of the day's slots from GET /availability, in CONSULTATION_TIME_ZONE (default Asia/Riyadh)
  *     responses:
  *       201:
  *         description: Consultation booked
  *       400:
- *         description: Missing required fields or invalid date
+ *         description: Missing or invalid fields
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
+ *       409:
+ *         description: Slot not offered, already passed, or already booked
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
+ *       429:
+ *         description: Too many submissions from this client
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
  */
-router.post("/", controller.createConsultation);
+router.post("/", publicFormRateLimit, controller.createConsultation);
 
 /**
  * @openapi

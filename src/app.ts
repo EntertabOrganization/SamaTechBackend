@@ -15,6 +15,10 @@ import availabilityRoutes from "./modules/availability/availability.routes";
 
 const app = express();
 
+// Behind a hosting proxy (Vercel, a load balancer), use the first
+// X-Forwarded-For hop as the client IP so per-visitor rate limits work.
+app.set("trust proxy", Number(process.env.TRUST_PROXY_HOPS ?? 1));
+
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -39,7 +43,7 @@ app.use(
 );
 app.use(morgan("dev"));
 app.use(cookieParser());
-app.use(express.json());
+app.use(express.json({ limit: "100kb" }));
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));

@@ -124,10 +124,36 @@ async function seedConsultations() {
   console.log(`Seeded ${created} new consultations (${consultations.length} total expected)`);
 }
 
+/**
+ * Default booking schedule shown on the website: Sunday to Thursday, Arabia
+ * Standard Time (see CONSULTATION_TIME_ZONE). Only applied when no schedule
+ * exists yet, so a schedule edited through PUT /api/availability is never overwritten.
+ */
+async function seedAvailability() {
+  if ((await prisma.availabilityRule.count()) > 0) {
+    console.log("Availability already configured; left unchanged");
+    return;
+  }
+
+  const workdaySlots = [
+    "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00",
+    "13:00", "14:00", "14:30", "15:00", "15:30", "16:00",
+  ];
+  const sundayToThursday = [0, 1, 2, 3, 4];
+
+  for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek += 1) {
+    await prisma.availabilityRule.create({
+      data: { dayOfWeek, timeSlots: sundayToThursday.includes(dayOfWeek) ? workdaySlots : [] },
+    });
+  }
+  console.log("Seeded weekly availability (Sunday to Thursday)");
+}
+
 async function main() {
   await seedUser();
   await seedContactMessages();
   await seedConsultations();
+  await seedAvailability();
 }
 
 main()
