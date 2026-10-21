@@ -12,6 +12,7 @@ function isValidDaysPayload(body: unknown): body is service.DayAvailability[] {
       !entry ||
       typeof entry !== "object" ||
       typeof entry.dayOfWeek !== "number" ||
+      !Number.isInteger(entry.dayOfWeek) ||
       entry.dayOfWeek < 0 ||
       entry.dayOfWeek > 6 ||
       seenDays.has(entry.dayOfWeek) ||

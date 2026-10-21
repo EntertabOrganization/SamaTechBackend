@@ -3,13 +3,14 @@ import { asyncHandler } from "../../utils/asyncHandler";
 import { ApiError } from "../../utils/ApiError";
 import { getPagination, buildPaginatedResult } from "../../utils/pagination";
 import * as service from "./users.service";
+import { optionalText, requiredEmail, requiredText } from "../../utils/validation";
 
 export const createUser = asyncHandler(async (req: Request, res: Response) => {
-  const { email, password, name } = req.body ?? {};
-
-  if (!email || !password) {
-    throw new ApiError(400, "email and password are required");
-  }
+  const body = req.body ?? {};
+  const email = requiredEmail(body);
+  requiredText(body, "password", 1024);
+  const password: string = body.password;
+  const name = optionalText(body, "name");
   if (password.length < 8) {
     throw new ApiError(400, "password must be at least 8 characters");
   }

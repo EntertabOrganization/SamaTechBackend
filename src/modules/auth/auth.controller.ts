@@ -4,6 +4,7 @@ import { asyncHandler } from "../../utils/asyncHandler";
 import { ApiError } from "../../utils/ApiError";
 import { signToken } from "../../utils/jwt";
 import * as authService from "./auth.service";
+import { requiredEmail, requiredText } from "../../utils/validation";
 
 const COOKIE_NAME = "token";
 const COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -20,11 +21,11 @@ const cookieOptions = () => ({
 });
 
 export const login = asyncHandler(async (req: Request, res: Response) => {
-  const { email, password } = req.body ?? {};
-
-  if (!email || !password) {
-    throw new ApiError(400, "email and password are required");
-  }
+  const body = req.body ?? {};
+  const email = requiredEmail(body);
+  requiredText(body, "password", 1024);
+  // Validate the type without trimming characters from an existing password.
+  const password: string = body.password;
 
   const user = await authService.findUserByEmail(email);
   if (!user) {

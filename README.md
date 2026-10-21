@@ -61,5 +61,16 @@ The website (`SamaTech`, Next.js) calls this API from the browser at
 - `npm run build`: generate Prisma client and compile into `dist`.
 - `npm start`: run compiled server.
 
+The build clears `dist` before compilation so removed modules cannot leave stale
+operations in production Swagger documentation.
+
+Browser integration tests are opt-in. With a migrated and seeded **test database**,
+start a backend with `NODE_ENV=test` (disables real email and Google Calendar calls)
+and start both frontends with `NEXT_PUBLIC_API_URL` pointing to that backend. Set
+`PORT` to its port, `WEBSITE_E2E_URL` and `DASHBOARD_E2E_URL` to the frontend origins,
+then run `npm run test:e2e`. The browser tests submit messages and bookings in both
+languages, manage those records in the dashboard, save availability, and execute
+Swagger's public and authenticated operations. Test records are cleaned up.
+
 SMTP and Google Calendar configuration remain available for consultation emails
 and Meet links. See `.env.example` and `npm run google:auth`.
