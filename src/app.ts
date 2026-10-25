@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec, swaggerUiOptions, swaggerUiCdnHost } from "./swagger/swagger";
 import { errorHandler } from "./middleware/errorHandler";
+import prisma from "./lib/prisma";
 
 import authRoutes from "./modules/auth/auth.routes";
 import userRoutes from "./modules/users/users.routes";
@@ -56,6 +57,24 @@ app.use("/api/availability", availabilityRoutes);
 
 app.get("/health", (_req: Request, res: Response) => {
   res.status(200).json({ status: "ok" });
+});
+
+// Reports whether DATABASE_URL works, with the Prisma error kind (never the URL),
+// so a deployment's database problems can be told apart without its logs.
+app.get("/health/db", async (_req: Request, res: Response) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    const users = await prisma.user.count();
+    res.status(200).json({ database: "ok", users });
+  } catch (err: any) {
+    res.status(503).json({
+      database: "error",
+      kind: err?.constructor?.name,
+      code: err?.errorCode ?? err?.code,
+      databaseUrlSet: Boolean(process.env.DATABASE_URL),
+      databaseUrlQuoted: /^["']/.test(process.env.DATABASE_URL ?? ""),
+    });
+  }
 });
 
 app.get("/", (_req: Request, res: Response) => {
