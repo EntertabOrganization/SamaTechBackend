@@ -9,11 +9,17 @@ import { requiredEmail, requiredText } from "../../utils/validation";
 const COOKIE_NAME = "token";
 const COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
-const baseCookieOptions = () => ({
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "lax" as const,
-});
+// In production the dashboard and the API usually sit on different sites
+// (e.g. two *.vercel.app projects), and browsers only send a cross-site cookie
+// with fetch() when it is SameSite=None; Secure.
+const baseCookieOptions = () => {
+  const production = process.env.NODE_ENV === "production";
+  return {
+    httpOnly: true,
+    secure: production,
+    sameSite: production ? ("none" as const) : ("lax" as const),
+  };
+};
 
 const cookieOptions = () => ({
   ...baseCookieOptions(),
