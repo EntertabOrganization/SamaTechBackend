@@ -12,8 +12,17 @@ export interface CreateContactMessageInput {
   message: string;
 }
 
+/** Only the fields present are changed; null clears an optional field. */
 export interface UpdateContactMessageInput {
   status?: ContactMessageStatus;
+  name?: string;
+  email?: string;
+  organization?: string | null;
+  jobTitle?: string | null;
+  phone?: string | null;
+  service?: string | null;
+  program?: string | null;
+  message?: string;
 }
 
 export const createContactMessage = (data: CreateContactMessageInput) => {

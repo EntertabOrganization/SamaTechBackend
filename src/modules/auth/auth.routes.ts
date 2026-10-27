@@ -39,6 +39,7 @@ const router = Router();
  *                     id: { type: string }
  *                     email: { type: string }
  *                     name: { type: string, nullable: true }
+ *                     role: { type: string, enum: [ADMIN, CONTACT, BOOKING] }
  *       400:
  *         description: Missing email or password
  *         content:
@@ -101,6 +102,7 @@ router.post("/logout", authMiddleware, authController.logout);
  *                     id: { type: string }
  *                     email: { type: string }
  *                     name: { type: string, nullable: true }
+ *                     role: { type: string, enum: [ADMIN, CONTACT, BOOKING] }
  *       401:
  *         description: Not authenticated
  *         content:

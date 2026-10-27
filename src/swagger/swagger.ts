@@ -5,10 +5,10 @@ const options: swaggerJSDoc.Options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "SamaTechs Backend API",
+      title: "SAMATECHS Backend API",
       version: "1.0.0",
       description:
-        "SamaTechs backend API for authentication, user management, contact messages, " +
+        "SAMATECHS backend API for authentication, user management, contact messages, " +
         "consultation bookings, and weekly availability.",
     },
     servers: [

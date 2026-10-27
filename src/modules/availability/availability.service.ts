@@ -32,3 +32,9 @@ export async function replaceWeeklyAvailability(days: DayAvailability[]): Promis
   );
   return listWeeklyAvailability();
 }
+
+/** Empties every day, so the website offers no consultation slots until a new schedule is saved. */
+export async function clearWeeklyAvailability(): Promise<DayAvailability[]> {
+  await prisma.availabilityRule.updateMany({ data: { timeSlots: [] } });
+  return listWeeklyAvailability();
+}

@@ -1,9 +1,11 @@
 import { Router } from "express";
 import { authMiddleware } from "../../middleware/auth.middleware";
 import { publicFormRateLimit } from "../../middleware/rateLimit.middleware";
+import { requireRole } from "../../middleware/role.middleware";
 import * as controller from "./consultations.controller";
 
 const router = Router();
+const staff = [authMiddleware, requireRole("BOOKING")];
 
 /**
  * @openapi
@@ -104,8 +106,13 @@ router.get("/booked", controller.getBookedTimes);
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
+ *       403:
+ *         description: Needs the ADMIN or BOOKING role
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
  */
-router.get("/", authMiddleware, controller.listConsultations);
+router.get("/", ...staff, controller.listConsultations);
 
 /**
  * @openapi
@@ -128,20 +135,26 @@ router.get("/", authMiddleware, controller.listConsultations);
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
+ *       403:
+ *         description: Needs the ADMIN or BOOKING role
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
  *       404:
  *         description: Consultation not found
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
  */
-router.get("/:id", authMiddleware, controller.getConsultation);
+router.get("/:id", ...staff, controller.getConsultation);
 
 /**
  * @openapi
  * /consultations/{id}:
  *   patch:
  *     tags: [Consultations]
- *     summary: Update a consultation's status
+ *     summary: Edit a consultation
+ *     description: Updates only the fields sent. A new date or time must not clash with another pending or confirmed booking.
  *     security:
  *       - cookieAuth: []
  *     parameters:
@@ -157,6 +170,15 @@ router.get("/:id", authMiddleware, controller.getConsultation);
  *             type: object
  *             properties:
  *               status: { type: string, enum: [PENDING, CONFIRMED, CANCELLED, COMPLETED] }
+ *               name: { type: string, maxLength: 200 }
+ *               company: { type: string, maxLength: 200 }
+ *               email: { type: string, format: email }
+ *               phone: { type: string, maxLength: 50 }
+ *               service: { type: string, maxLength: 200 }
+ *               notes: { type: string, maxLength: 5000 }
+ *               date: { type: string, format: date, example: "2026-11-01" }
+ *               time: { type: string, example: "10:00" }
+ *               meetLink: { type: string, format: uri }
  *     responses:
  *       200:
  *         description: Consultation updated
@@ -170,13 +192,18 @@ router.get("/:id", authMiddleware, controller.getConsultation);
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
+ *       403:
+ *         description: Needs the ADMIN or BOOKING role
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
  *       404:
  *         description: Consultation not found
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
  */
-router.patch("/:id", authMiddleware, controller.updateConsultation);
+router.patch("/:id", ...staff, controller.updateConsultation);
 
 /**
  * @openapi
@@ -199,12 +226,17 @@ router.patch("/:id", authMiddleware, controller.updateConsultation);
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
+ *       403:
+ *         description: Needs the ADMIN or BOOKING role
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
  *       404:
  *         description: Consultation not found
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
  */
-router.delete("/:id", authMiddleware, controller.deleteConsultation);
+router.delete("/:id", ...staff, controller.deleteConsultation);
 
 export default router;

@@ -47,7 +47,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   res.cookie(COOKIE_NAME, token, cookieOptions());
 
   res.status(200).json({
-    user: { id: user.id, email: user.email, name: user.name },
+    user: { id: user.id, email: user.email, name: user.name, role: user.role },
   });
 });
 
@@ -67,6 +67,6 @@ export const me = asyncHandler(async (req: Request, res: Response) => {
   }
 
   res.status(200).json({
-    user: { id: user.id, email: user.email, name: user.name },
+    user: { id: user.id, email: user.email, name: user.name, role: user.role },
   });
 });

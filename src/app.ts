@@ -79,7 +79,7 @@ app.get("/health/db", async (_req: Request, res: Response) => {
 
 app.get("/", (_req: Request, res: Response) => {
   res.status(200).json({
-    name: "SamaTechs Backend API",
+    name: "SAMATECHS Backend API",
     docs: "/api-docs",
     health: "/health",
   });

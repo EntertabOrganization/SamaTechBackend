@@ -1,9 +1,12 @@
 import { NextFunction, Request, Response } from "express";
+import { UserRole } from "@prisma/client";
 import { verifyToken } from "../utils/jwt";
 
 export interface UserPayload {
   id: string;
   email: string;
+  /** Set by `requireRole`, which reads it from the database. */
+  role?: UserRole;
 }
 
 declare global {

@@ -11,7 +11,7 @@ describe("Request validation", () => {
   ])("rejects malformed login fields before querying the database: %j", async (body) => {
     const response = await request(app).post("/api/auth/login").send(body);
     expect(response.status).toBe(400);
-    expect(prismaMock.user.findUnique).not.toHaveBeenCalled();
+    expect(prismaMock.user.findFirst).not.toHaveBeenCalled();
   });
 
   it.each([

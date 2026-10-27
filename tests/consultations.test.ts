@@ -309,6 +309,19 @@ describe("Consultations module", () => {
   });
 
   describe("PATCH /api/consultations/:id", () => {
+    it("refuses to move a booking onto another live booking", async () => {
+      prismaMock.consultation.findUnique.mockResolvedValue(CONSULTATION as any);
+      prismaMock.consultation.findMany.mockResolvedValue([{ time: "11:00" }] as any);
+
+      const res = await request(app)
+        .patch(`/api/consultations/${CONSULTATION.id}`)
+        .set("Cookie", authCookie())
+        .send({ time: "11:00", status: "PENDING" });
+
+      expect(res.status).toBe(409);
+      expect(prismaMock.consultation.update).not.toHaveBeenCalled();
+    });
+
     it("updates a consultation's status", async () => {
       prismaMock.consultation.findUnique.mockResolvedValue(
         CONSULTATION as any
@@ -317,6 +330,8 @@ describe("Consultations module", () => {
         ...CONSULTATION,
         status: "CONFIRMED",
       } as any);
+      // No other live booking holds the slot.
+      prismaMock.consultation.findMany.mockResolvedValue([]);
 
       const res = await request(app)
         .patch(`/api/consultations/${CONSULTATION.id}`)

@@ -1,9 +1,11 @@
 import { Router } from "express";
 import { authMiddleware } from "../../middleware/auth.middleware";
 import { publicFormRateLimit } from "../../middleware/rateLimit.middleware";
+import { requireRole } from "../../middleware/role.middleware";
 import * as controller from "./contact.controller";
 
 const router = Router();
+const staff = [authMiddleware, requireRole("CONTACT")];
 
 /**
  * @openapi
@@ -74,8 +76,13 @@ router.post("/", publicFormRateLimit, controller.createContactMessage);
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
+ *       403:
+ *         description: Needs the ADMIN or CONTACT role
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
  */
-router.get("/", authMiddleware, controller.listContactMessages);
+router.get("/", ...staff, controller.listContactMessages);
 
 /**
  * @openapi
@@ -98,20 +105,26 @@ router.get("/", authMiddleware, controller.listContactMessages);
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
+ *       403:
+ *         description: Needs the ADMIN or CONTACT role
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
  *       404:
  *         description: Message not found
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
  */
-router.get("/:id", authMiddleware, controller.getContactMessage);
+router.get("/:id", ...staff, controller.getContactMessage);
 
 /**
  * @openapi
  * /contact/{id}:
  *   patch:
  *     tags: [Contact]
- *     summary: Update a contact message's status
+ *     summary: Edit a contact message
+ *     description: Updates only the fields sent.
  *     security:
  *       - cookieAuth: []
  *     parameters:
@@ -127,6 +140,14 @@ router.get("/:id", authMiddleware, controller.getContactMessage);
  *             type: object
  *             properties:
  *               status: { type: string, enum: [NEW, READ, RESPONDED] }
+ *               name: { type: string, maxLength: 200 }
+ *               email: { type: string, format: email }
+ *               organization: { type: string, maxLength: 200 }
+ *               jobTitle: { type: string, maxLength: 200 }
+ *               phone: { type: string, maxLength: 50 }
+ *               service: { type: string, maxLength: 200 }
+ *               program: { type: string, maxLength: 200 }
+ *               message: { type: string, maxLength: 5000 }
  *     responses:
  *       200:
  *         description: Message updated
@@ -140,13 +161,18 @@ router.get("/:id", authMiddleware, controller.getContactMessage);
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
+ *       403:
+ *         description: Needs the ADMIN or CONTACT role
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
  *       404:
  *         description: Message not found
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
  */
-router.patch("/:id", authMiddleware, controller.updateContactMessage);
+router.patch("/:id", ...staff, controller.updateContactMessage);
 
 /**
  * @openapi
@@ -169,12 +195,17 @@ router.patch("/:id", authMiddleware, controller.updateContactMessage);
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
+ *       403:
+ *         description: Needs the ADMIN or CONTACT role
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
  *       404:
  *         description: Message not found
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
  */
-router.delete("/:id", authMiddleware, controller.deleteContactMessage);
+router.delete("/:id", ...staff, controller.deleteContactMessage);
 
 export default router;

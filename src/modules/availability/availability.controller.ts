@@ -46,3 +46,9 @@ export const updateWeeklyAvailability = asyncHandler(async (req: Request, res: R
   const days = await service.replaceWeeklyAvailability(body);
   res.status(200).json({ data: days });
 });
+
+/** Protected — closes every day for booking. */
+export const clearWeeklyAvailability = asyncHandler(async (_req: Request, res: Response) => {
+  const days = await service.clearWeeklyAvailability();
+  res.status(200).json({ data: days });
+});

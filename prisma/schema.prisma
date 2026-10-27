@@ -7,11 +7,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/// What a dashboard user may manage: ADMIN everything, CONTACT the contact
+/// messages, BOOKING the consultation bookings and the weekly availability.
+enum UserRole {
+  ADMIN
+  CONTACT
+  BOOKING
+}
+
 model User {
   id           String   @id @default(uuid())
   email        String   @unique
   passwordHash String
   name         String?
+  role         UserRole @default(ADMIN)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

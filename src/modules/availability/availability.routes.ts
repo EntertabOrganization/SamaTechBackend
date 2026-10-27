@@ -1,8 +1,10 @@
 import { Router } from "express";
 import { authMiddleware } from "../../middleware/auth.middleware";
+import { requireRole } from "../../middleware/role.middleware";
 import * as controller from "./availability.controller";
 
 const router = Router();
+const staff = [authMiddleware, requireRole("BOOKING")];
 
 /**
  * @openapi
@@ -52,7 +54,36 @@ router.get("/", controller.getWeeklyAvailability);
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
+ *       403:
+ *         description: Needs the ADMIN or BOOKING role
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
  */
-router.put("/", authMiddleware, controller.updateWeeklyAvailability);
+router.put("/", ...staff, controller.updateWeeklyAvailability);
+
+/**
+ * @openapi
+ * /availability:
+ *   delete:
+ *     tags: [Availability]
+ *     summary: Clear the weekly availability (no day is bookable afterwards)
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: The 7 days, all with empty timeSlots
+ *       401:
+ *         description: Not authenticated
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
+ *       403:
+ *         description: Needs the ADMIN or BOOKING role
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
+ */
+router.delete("/", ...staff, controller.clearWeeklyAvailability);
 
 export default router;

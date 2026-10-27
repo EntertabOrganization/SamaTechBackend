@@ -8,7 +8,7 @@ describe("Auth module", () => {
   describe("POST /api/auth/login", () => {
     it("logs in successfully with correct credentials and sets a cookie", async () => {
       const passwordHash = await bcrypt.hash("User@1234", 10);
-      prismaMock.user.findUnique.mockResolvedValue({
+      prismaMock.user.findFirst.mockResolvedValue({
         id: TEST_USER.id,
         email: TEST_USER.email,
         passwordHash,
@@ -29,7 +29,7 @@ describe("Auth module", () => {
 
     it("returns 401 for wrong password", async () => {
       const passwordHash = await bcrypt.hash("User@1234", 10);
-      prismaMock.user.findUnique.mockResolvedValue({
+      prismaMock.user.findFirst.mockResolvedValue({
         id: TEST_USER.id,
         email: TEST_USER.email,
         passwordHash,
@@ -47,7 +47,7 @@ describe("Auth module", () => {
     });
 
     it("returns 401 for unknown email", async () => {
-      prismaMock.user.findUnique.mockResolvedValue(null);
+      prismaMock.user.findFirst.mockResolvedValue(null);
 
       const res = await request(app)
         .post("/api/auth/login")

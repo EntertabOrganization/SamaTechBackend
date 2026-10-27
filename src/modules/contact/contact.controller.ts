@@ -80,14 +80,24 @@ export const updateContactMessage = asyncHandler(
       throw new ApiError(404, "Contact message not found");
     }
 
-    const { status } = req.body ?? {};
-    if (status && !VALID_STATUSES.includes(status)) {
-      throw new ApiError(400, `status must be one of: ${VALID_STATUSES.join(", ")}`);
-    }
+    const body = req.body ?? {};
+    const data: service.UpdateContactMessageInput = {};
 
-    const contactMessage = await service.updateContactMessage(req.params.id, {
-      status,
-    });
+    if (body.status !== undefined) {
+      if (!VALID_STATUSES.includes(body.status)) {
+        throw new ApiError(400, `status must be one of: ${VALID_STATUSES.join(", ")}`);
+      }
+      data.status = body.status;
+    }
+    if (body.name !== undefined) data.name = requiredText(body, "name");
+    if (body.email !== undefined) data.email = requiredEmail(body);
+    if (body.message !== undefined) data.message = requiredText(body, "message", MAX_LENGTH.long);
+    for (const field of ["organization", "jobTitle", "service", "program"] as const) {
+      if (body[field] !== undefined) data[field] = optionalText(body, field) ?? null;
+    }
+    if (body.phone !== undefined) data.phone = optionalText(body, "phone", 50) ?? null;
+
+    const contactMessage = await service.updateContactMessage(existing.id, data);
     res.status(200).json(contactMessage);
   }
 );

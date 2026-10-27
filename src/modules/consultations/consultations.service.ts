@@ -14,8 +14,18 @@ export interface CreateConsultationInput {
   meetLink?: string;
 }
 
+/** Only the fields present are changed; null clears an optional field. */
 export interface UpdateConsultationInput {
   status?: ConsultationStatus;
+  name?: string;
+  company?: string | null;
+  email?: string;
+  phone?: string | null;
+  service?: string | null;
+  notes?: string | null;
+  date?: Date;
+  time?: string;
+  meetLink?: string;
 }
 
 export const createConsultation = (data: CreateConsultationInput) => {
@@ -45,8 +55,11 @@ export const getConsultationById = (id: string) => {
   return prisma.consultation.findUnique({ where: { id } });
 };
 
-/** Time slots already taken on a given day — PENDING/CONFIRMED bookings only; CANCELLED frees the slot back up. */
-export const listBookedTimesForDate = async (date: Date): Promise<string[]> => {
+/**
+ * Time slots already taken on a given day — PENDING/CONFIRMED bookings only;
+ * CANCELLED frees the slot back up. `excludeId` leaves one booking out, for editing it.
+ */
+export const listBookedTimesForDate = async (date: Date, excludeId?: string): Promise<string[]> => {
   const startOfDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
   const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
 
@@ -54,6 +67,7 @@ export const listBookedTimesForDate = async (date: Date): Promise<string[]> => {
     where: {
       date: { gte: startOfDay, lt: endOfDay },
       status: { in: ["PENDING", "CONFIRMED"] },
+      ...(excludeId ? { id: { not: excludeId } } : {}),
     },
     select: { time: true },
   });
