@@ -5,7 +5,7 @@ import { requireRole } from "../../middleware/role.middleware";
 import * as controller from "./contact.controller";
 
 const router = Router();
-const staff = [authMiddleware, requireRole("CONTACT")];
+const staff = [authMiddleware, requireRole("MESSAGES")];
 
 /**
  * @openapi
@@ -77,7 +77,7 @@ router.post("/", publicFormRateLimit, controller.createContactMessage);
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
  *       403:
- *         description: Needs the ADMIN or CONTACT role
+ *         description: Needs the ADMIN or MESSAGES role
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
@@ -106,7 +106,7 @@ router.get("/", ...staff, controller.listContactMessages);
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
  *       403:
- *         description: Needs the ADMIN or CONTACT role
+ *         description: Needs the ADMIN or MESSAGES role
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
@@ -162,7 +162,7 @@ router.get("/:id", ...staff, controller.getContactMessage);
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
  *       403:
- *         description: Needs the ADMIN or CONTACT role
+ *         description: Needs the ADMIN or MESSAGES role
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
@@ -196,7 +196,7 @@ router.patch("/:id", ...staff, controller.updateContactMessage);
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
  *       403:
- *         description: Needs the ADMIN or CONTACT role
+ *         description: Needs the ADMIN or MESSAGES role
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }

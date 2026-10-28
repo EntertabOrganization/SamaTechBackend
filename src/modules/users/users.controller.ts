@@ -6,7 +6,7 @@ import { getPagination, buildPaginatedResult } from "../../utils/pagination";
 import * as service from "./users.service";
 import { MAX_LENGTH, optionalText, requiredEmail, requiredText } from "../../utils/validation";
 
-const VALID_ROLES: UserRole[] = ["ADMIN", "CONTACT", "BOOKING"];
+const VALID_ROLES: UserRole[] = ["ADMIN", "MESSAGES", "BOOKING"];
 
 function parseRole(value: unknown): UserRole {
   if (!VALID_ROLES.includes(value as UserRole)) {

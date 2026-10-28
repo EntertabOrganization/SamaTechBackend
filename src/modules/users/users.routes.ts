@@ -12,7 +12,7 @@ router.use(authMiddleware, requireAdmin);
  *   post:
  *     tags: [User]
  *     summary: Create a new dashboard user
- *     description: Grants another person login access to the dashboard with one role — ADMIN (everything), CONTACT (contact messages) or BOOKING (consultations and availability). Admins only.
+ *     description: Grants another person login access to the dashboard with one role — ADMIN (everything), MESSAGES (contact messages) or BOOKING (consultations and availability). Admins only.
  *     security:
  *       - cookieAuth: []
  *     requestBody:
@@ -26,7 +26,7 @@ router.use(authMiddleware, requireAdmin);
  *               email: { type: string, format: email }
  *               password: { type: string, format: password, minLength: 8 }
  *               name: { type: string }
- *               role: { type: string, enum: [ADMIN, CONTACT, BOOKING] }
+ *               role: { type: string, enum: [ADMIN, MESSAGES, BOOKING] }
  *     responses:
  *       201:
  *         description: User created
@@ -103,7 +103,7 @@ router.get("/", controller.listUsers);
  *               email: { type: string, format: email }
  *               password: { type: string, format: password, minLength: 8 }
  *               name: { type: string }
- *               role: { type: string, enum: [ADMIN, CONTACT, BOOKING] }
+ *               role: { type: string, enum: [ADMIN, MESSAGES, BOOKING] }
  *     responses:
  *       200:
  *         description: User updated

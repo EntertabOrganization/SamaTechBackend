@@ -58,21 +58,21 @@ describe("Roles", () => {
   });
 
   it("lets only admins manage users", async () => {
-    for (const role of ["CONTACT", "BOOKING"]) {
+    for (const role of ["MESSAGES", "BOOKING"]) {
       signedInAs(role);
       expect((await request(app).get("/api/users").set("Cookie", authCookie())).status).toBe(403);
       expect((await request(app).delete("/api/users/x").set("Cookie", authCookie())).status).toBe(403);
     }
   });
 
-  it("limits CONTACT to contact messages and BOOKING to consultations and availability", async () => {
+  it("limits MESSAGES to contact messages and BOOKING to consultations and availability", async () => {
     prismaMock.contactMessage.findMany.mockResolvedValue([]);
     prismaMock.contactMessage.count.mockResolvedValue(0);
     prismaMock.consultation.findMany.mockResolvedValue([]);
     prismaMock.consultation.count.mockResolvedValue(0);
     prismaMock.availabilityRule.findMany.mockResolvedValue([]);
 
-    signedInAs("CONTACT");
+    signedInAs("MESSAGES");
     expect((await request(app).get("/api/contact").set("Cookie", authCookie())).status).toBe(200);
     expect((await request(app).get("/api/consultations").set("Cookie", authCookie())).status).toBe(403);
     expect((await request(app).delete("/api/availability").set("Cookie", authCookie())).status).toBe(403);
@@ -96,12 +96,12 @@ describe("Editing and deleting users", () => {
     prismaMock.user.findUnique
       .mockResolvedValueOnce({ ...TEST_USER, role: "ADMIN" } as any)
       .mockResolvedValueOnce({ ...other, role: "BOOKING" } as any);
-    prismaMock.user.update.mockResolvedValue({ ...other, role: "CONTACT" } as any);
+    prismaMock.user.update.mockResolvedValue({ ...other, role: "MESSAGES" } as any);
     const res = await request(app).patch("/api/users/other-id").set("Cookie", authCookie())
-      .send({ role: "CONTACT", password: "NewPass@123" });
+      .send({ role: "MESSAGES", password: "NewPass@123" });
     expect(res.status).toBe(200);
     const call = prismaMock.user.update.mock.calls[0][0];
-    expect(call.data.role).toBe("CONTACT");
+    expect(call.data.role).toBe("MESSAGES");
     expect(await bcrypt.compare("NewPass@123", call.data.passwordHash as string)).toBe(true);
     expect(call.select).not.toHaveProperty("passwordHash");
   });
@@ -128,7 +128,7 @@ describe("Editing and deleting users", () => {
   it("deletes another user", async () => {
     prismaMock.user.findUnique
       .mockResolvedValueOnce({ ...TEST_USER, role: "ADMIN" } as any)
-      .mockResolvedValueOnce({ ...other, role: "CONTACT" } as any);
+      .mockResolvedValueOnce({ ...other, role: "MESSAGES" } as any);
     prismaMock.user.delete.mockResolvedValue(other as any);
     const res = await request(app).delete("/api/users/other-id").set("Cookie", authCookie());
     expect(res.status).toBe(200);

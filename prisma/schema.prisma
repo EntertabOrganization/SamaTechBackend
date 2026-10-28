@@ -7,11 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/// What a dashboard user may manage: ADMIN everything, CONTACT the contact
+/// What a dashboard user may manage: ADMIN everything, MESSAGES the contact
 /// messages, BOOKING the consultation bookings and the weekly availability.
 enum UserRole {
   ADMIN
-  CONTACT
+  MESSAGES
   BOOKING
 }
 
