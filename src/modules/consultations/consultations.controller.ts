@@ -56,13 +56,19 @@ export const createConsultation = asyncHandler(
       throw new ApiError(409, "That time slot has just been booked — please pick another");
     }
 
-    const createMeeting = process.env.CALENDAR_PROVIDER === "microsoft" ? createMicrosoftMeeting : createMeetLink;
-    const meetLink = await createMeeting({
+    const isMicrosoft = process.env.CALENDAR_PROVIDER === "microsoft";
+    const createMeeting = isMicrosoft ? createMicrosoftMeeting : createMeetLink;
+    let meetLink = await createMeeting({
       summary: `SAMATECHS consultation with ${name}`,
       description: svc ? `Service: ${svc}` : undefined,
       startTime: slotStart ?? parsedDate,
       durationMinutes: CONSULTATION_DURATION_MINUTES,
     });
+
+    if (isMicrosoft && !meetLink) {
+      console.warn("[consultations] Teams join link could not be auto-generated. Using Teams fallback link.");
+      meetLink = "https://teams.microsoft.com";
+    }
 
     const consultation = await service.createConsultation({
       name,
