@@ -83,9 +83,21 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 /** The /onlineMeetings API (app-only) expects the user's object ID, not a UPN/email. */
 async function getMailboxObjectId(): Promise<string> {
   if (cachedMailboxId) return cachedMailboxId;
-  const user = await graphRequest("?$select=id", undefined, "GET");
-  cachedMailboxId = user.id as string;
-  return cachedMailboxId;
+  if (process.env.MICROSOFT_MAILBOX_USER_ID) {
+    cachedMailboxId = process.env.MICROSOFT_MAILBOX_USER_ID;
+    return cachedMailboxId;
+  }
+  try {
+    // Needs the User.Read.All application permission; /onlineMeetings rejects UPNs ("not a valid GUID").
+    const user = await graphRequest("?$select=id", undefined, "GET");
+    cachedMailboxId = user.id as string;
+    return cachedMailboxId;
+  } catch (err) {
+    throw new Error(
+      `Could not resolve the mailbox's object ID (${(err as Error).message}). ` +
+      "Set MICROSOFT_MAILBOX_USER_ID to the user's Object ID from Entra ID, or grant the app User.Read.All."
+    );
+  }
 }
 
 /** Logs why Exchange might refuse to attach a Teams meeting to calendar events. */
