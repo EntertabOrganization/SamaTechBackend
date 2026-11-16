@@ -1,4 +1,4 @@
-﻿import { SendMailInput } from "./mailer";
+import { SendMailInput } from "./mailer";
 import { CreateMeetingInput } from "./googleCalendar";
 
 // Microsoft 365 app-only access. The selected mailbox must have an Exchange calendar.
