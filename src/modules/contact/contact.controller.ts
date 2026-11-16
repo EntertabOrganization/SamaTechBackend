@@ -25,18 +25,22 @@ export const createContactMessage = asyncHandler(
       message: requiredText(body, "message", MAX_LENGTH.long),
     });
 
-    res.status(201).json(contactMessage);
-
     const notifyEmail = process.env.CONTACT_NOTIFY_EMAIL || process.env.CONSULTATION_NOTIFY_EMAIL;
     if (notifyEmail) {
-      const staffEmail = contactStaffNotificationEmail(contactMessage);
-      void sendMail({
-        to: notifyEmail,
-        subject: staffEmail.subject,
-        html: staffEmail.html,
-        replyTo: contactMessage.email,
-      });
+      try {
+        const staffEmail = contactStaffNotificationEmail(contactMessage);
+        await sendMail({
+          to: notifyEmail,
+          subject: staffEmail.subject,
+          html: staffEmail.html,
+          replyTo: contactMessage.email,
+        });
+      } catch (mailErr) {
+        console.error("[contact] Failed to send contact notification email:", mailErr);
+      }
     }
+
+    res.status(201).json(contactMessage);
   }
 );
 

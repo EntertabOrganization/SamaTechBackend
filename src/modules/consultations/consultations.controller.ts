@@ -82,37 +82,48 @@ export const createConsultation = asyncHandler(
       meetLink: meetLink ?? undefined,
     });
 
-    res.status(201).json(consultation);
-
-    const customerEmail = consultationConfirmationEmail({
-      name: consultation.name,
-      date: consultation.date,
-      time: consultation.time,
-      meetLink: consultation.meetLink,
-      service: consultation.service,
-    });
-    void sendMail({ to: consultation.email, subject: customerEmail.subject, html: customerEmail.html });
-
-    const notifyEmail = process.env.CONSULTATION_NOTIFY_EMAIL;
-    if (notifyEmail) {
-      const staffEmail = consultationStaffNotificationEmail({
+    try {
+      const customerEmail = consultationConfirmationEmail({
         name: consultation.name,
-        company: consultation.company,
-        email: consultation.email,
-        phone: consultation.phone,
-        service: consultation.service,
-        notes: consultation.notes,
         date: consultation.date,
         time: consultation.time,
         meetLink: consultation.meetLink,
+        service: consultation.service,
       });
-      void sendMail({
-        to: notifyEmail,
-        subject: staffEmail.subject,
-        html: staffEmail.html,
-        replyTo: consultation.email,
-      });
+
+      const emailPromises = [
+        sendMail({ to: consultation.email, subject: customerEmail.subject, html: customerEmail.html }),
+      ];
+
+      const notifyEmail = process.env.CONSULTATION_NOTIFY_EMAIL;
+      if (notifyEmail) {
+        const staffEmail = consultationStaffNotificationEmail({
+          name: consultation.name,
+          company: consultation.company,
+          email: consultation.email,
+          phone: consultation.phone,
+          service: consultation.service,
+          notes: consultation.notes,
+          date: consultation.date,
+          time: consultation.time,
+          meetLink: consultation.meetLink,
+        });
+        emailPromises.push(
+          sendMail({
+            to: notifyEmail,
+            subject: staffEmail.subject,
+            html: staffEmail.html,
+            replyTo: consultation.email,
+          })
+        );
+      }
+
+      await Promise.allSettled(emailPromises);
+    } catch (mailErr) {
+      console.error("[consultations] Failed to send emails:", mailErr);
     }
+
+    res.status(201).json(consultation);
   }
 );
 
