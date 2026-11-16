@@ -74,3 +74,26 @@ Swagger's public and authenticated operations. Test records are cleaned up.
 
 SMTP and Google Calendar configuration remain available for consultation emails
 and Meet links. See `.env.example` and `npm run google:auth`.
+
+## Microsoft 365 mail and calendar
+
+For a Microsoft 365 work or school mailbox, register an application in Microsoft Entra ID. Under Microsoft Graph **Application permissions**, add `Mail.Send` and `Calendars.ReadWrite` and have an administrator grant consent. Application permissions can cover mailboxes throughout the tenant; restrict the application to the intended mailbox using Exchange Online application RBAC. The mailbox needs an Exchange calendar and support for Teams online meetings.
+
+Create a client secret and set these values in the backend environment (including in the deployed server, if applicable):
+
+```env
+MAIL_PROVIDER=microsoft
+CALENDAR_PROVIDER=microsoft
+MICROSOFT_TENANT_ID=your-tenant-id
+MICROSOFT_CLIENT_ID=your-application-id
+MICROSOFT_CLIENT_SECRET=your-client-secret
+MICROSOFT_MAILBOX=staff@example.com
+CONSULTATION_NOTIFY_EMAIL=staff@example.com
+CONTACT_NOTIFY_EMAIL=staff@example.com
+```
+
+Restart the server. Graph sends email from the configured mailbox; `EMAIL_FROM` applies only to SMTP. New bookings create an event in that mailbox's default calendar and request a Teams join link, which is included in the existing confirmation emails. No attendee invitation is created. Microsoft accepts mail asynchronously, so acceptance does not guarantee delivery. Test with a real booking and contact message after configuring credentials.
+
+This integration currently supports Microsoft 365 organizational accounts, not personal Outlook.com accounts. Creating a booking is best effort: if event creation fails or Teams provides no join link, the existing database default Google Meet placeholder is used; that placeholder does not create a shared meeting. Calendar events are not updated or deleted when staff edit or cancel a booking. Credentials are intentionally not included in this repository.
+
+Microsoft documentation: https://learn.microsoft.com/en-us/graph/auth-v2-service and https://learn.microsoft.com/en-us/graph/outlook-calendar-online-meetings.

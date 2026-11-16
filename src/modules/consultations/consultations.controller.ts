@@ -15,6 +15,7 @@ import { sendMail } from "../../lib/mailer";
 import { consultationConfirmationEmail } from "../../emails/consultationConfirmation";
 import { consultationStaffNotificationEmail } from "../../emails/consultationStaffNotification";
 import { createMeetLink } from "../../lib/googleCalendar";
+import { createMicrosoftMeeting } from "../../lib/microsoftGraph";
 import * as availabilityService from "../availability/availability.service";
 import * as service from "./consultations.service";
 
@@ -55,7 +56,8 @@ export const createConsultation = asyncHandler(
       throw new ApiError(409, "That time slot has just been booked — please pick another");
     }
 
-    const meetLink = await createMeetLink({
+    const createMeeting = process.env.CALENDAR_PROVIDER === "microsoft" ? createMicrosoftMeeting : createMeetLink;
+    const meetLink = await createMeeting({
       summary: `SAMATECHS consultation with ${name}`,
       description: svc ? `Service: ${svc}` : undefined,
       startTime: slotStart ?? parsedDate,

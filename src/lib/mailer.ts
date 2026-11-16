@@ -1,4 +1,5 @@
 import nodemailer, { Transporter } from "nodemailer";
+import { sendMicrosoftMail } from "./microsoftGraph";
 
 /**
  * Generic SMTP mailer — works with any provider (Gmail, SES, SendGrid,
@@ -50,6 +51,15 @@ export interface SendMailInput {
 }
 
 export async function sendMail({ to, subject, html, replyTo }: SendMailInput): Promise<void> {
+  if (process.env.NODE_ENV !== "test" && process.env.MAIL_PROVIDER === "microsoft") {
+    try {
+      await sendMicrosoftMail({ to, subject, html, replyTo });
+      console.log(`[mailer] Microsoft accepted "${subject}" for ${to}`);
+    } catch (err) {
+      console.error(`[mailer] Microsoft failed to send "${subject}" to ${to}:`, err);
+    }
+    return;
+  }
   const from = process.env.EMAIL_FROM || "SAMATECHS <no-reply@samatechs.com>";
   const client = getTransporter();
 
