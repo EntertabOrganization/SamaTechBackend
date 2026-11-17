@@ -59,7 +59,7 @@ export function consultationStaffNotificationEmail(params: {
     bodyHtml: `
       <p style="margin: 0 0 20px;">A new consultation was just booked on SAMATECHS. Details below:</p>
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
-             style="background-color: #F4F8FD; border: 1px solid #E4ECF7; border-radius: 12px;">
+             style="background-color: #F4F8FD; background-image: linear-gradient(180deg, #FFFFFF 0%, #E9F0F9 100%); border: 1px solid #BDD4EE; border-radius: 12px;">
         <tr>
           <td style="padding: 20px 24px;">
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">

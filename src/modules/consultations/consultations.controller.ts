@@ -86,6 +86,8 @@ export const createConsultation = asyncHandler(
     try {
       const customerEmail = consultationConfirmationEmail({
         name: consultation.name,
+        company: consultation.company,
+        email: consultation.email,
         date: consultation.date,
         time: consultation.time,
         meetLink: consultation.meetLink,
