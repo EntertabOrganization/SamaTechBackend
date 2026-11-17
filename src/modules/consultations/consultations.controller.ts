@@ -12,6 +12,7 @@ import {
   requiredText,
 } from "../../utils/validation";
 import { sendMail } from "../../lib/mailer";
+import { consultationCancellationEmail } from "../../emails/consultationCancellation";
 import { consultationConfirmationEmail } from "../../emails/consultationConfirmation";
 import { consultationStaffNotificationEmail } from "../../emails/consultationStaffNotification";
 import { createMeetLink } from "../../lib/googleCalendar";
@@ -223,6 +224,10 @@ export const updateConsultation = asyncHandler(
     }
 
     const consultation = await service.updateConsultation(existing.id, data);
+    if (existing.status !== "CANCELLED" && consultation.status === "CANCELLED") {
+      const email = consultationCancellationEmail({ name: existing.name, date: existing.date, time: existing.time });
+      await sendMail({ to: existing.email, subject: email.subject, html: email.html });
+    }
     res.status(200).json(consultation);
   }
 );

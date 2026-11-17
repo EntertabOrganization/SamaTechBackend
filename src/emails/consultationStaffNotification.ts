@@ -38,7 +38,7 @@ export function consultationStaffNotificationEmail(params: {
     ["Time", formattedTime],
     [
       "Meeting Link",
-      `<a href="${params.meetLink}" style="color: #0078FF; font-weight: 600; text-decoration: none;">${params.meetLink}</a>`,
+      `<a href="${escapeHtml(params.meetLink)}" style="color: #0078FF; font-weight: 600; text-decoration: none;">${escapeHtml(params.meetLink)}</a>`,
     ],
     ...(params.notes ? ([["Notes", escapeHtml(params.notes)]] as [string, string][]) : []),
   ];
@@ -47,8 +47,8 @@ export function consultationStaffNotificationEmail(params: {
     .map(
       ([label, value]) => `
               <tr>
-                <td style="padding: 6px 0; font-size: 14px; color: #666666; width: 110px; vertical-align: top;">${label}</td>
-                <td style="padding: 6px 0; font-size: 14px; color: #0F1B2D; font-weight: 600;">${value}</td>
+                <td style="padding: 6px 16px 6px 0; font-size: 14px; color: #666666; width: 110px; min-width: 110px; white-space: nowrap; vertical-align: top;">${label}</td>
+                <td style="padding: 6px 0; font-size: 14px; overflow-wrap: anywhere; word-break: break-word; color: #0F1B2D; font-weight: 600;">${value}</td>
               </tr>`
     )
     .join("");

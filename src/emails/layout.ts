@@ -8,7 +8,7 @@
  */
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "https://www.samatechs.com";
-const LOGO_URL = process.env.EMAIL_LOGO_URL || "https://www.samatechs.com/logo/mark.png";
+const LOGO_URL = process.env.EMAIL_LOGO_URL || `${FRONTEND_URL}/email-logo.png`;
 
 const COLORS = {
   primary: "#0078FF",
@@ -58,22 +58,13 @@ export function renderEmailLayout({ preheader, heading, bodyHtml, ctaLabel, ctaU
 </head>
 <body style="margin: 0; padding: 0; background-color: ${COLORS.cream}; font-family: 'Segoe UI', Arial, sans-serif;">
   <div style="display: none; max-height: 0; overflow: hidden; opacity: 0;">${preheader}</div>
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: ${COLORS.cream};">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: ${COLORS.cream}; background-image: radial-gradient(ellipse at top, #d9eaff 0%, #f4f8fd 70%);">
     <tr>
       <td align="center" style="padding: 32px 16px;">
         <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; width: 100%; background-color: ${COLORS.white}; border-radius: 16px; overflow: hidden; border: 1px solid ${COLORS.border};">
           <tr>
-            <td align="center" bgcolor="${COLORS.white}" style="background-color: ${COLORS.white}; padding: 28px 24px; border-bottom: 1px solid ${COLORS.border};">
-              <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
-                <tr>
-                  <td valign="middle" style="padding-right: 12px;">
-                    <img src="${LOGO_URL}" width="40" height="40" alt="SAMATECHS" style="display: block; width: 40px; height: 40px; border: 0;" />
-                  </td>
-                  <td valign="middle" style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 22px; font-weight: 800; letter-spacing: 1.5px; color: ${COLORS.primaryDark}; text-transform: uppercase;">
-                    SAMATECHS
-                  </td>
-                </tr>
-              </table>
+            <td align="left" bgcolor="${COLORS.white}" style="background-color: ${COLORS.white}; padding: 28px 36px; border-bottom: 1px solid ${COLORS.border};">
+              <img src="${LOGO_URL}" width="202" alt="SAMATECHS" style="display: block; width: 202px; max-width: 100%; height: auto; border: 0;" />
             </td>
           </tr>
           <tr>

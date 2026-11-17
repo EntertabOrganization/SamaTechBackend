@@ -309,6 +309,31 @@ describe("Consultations module", () => {
   });
 
   describe("PATCH /api/consultations/:id", () => {
+    it("emails the original appointment details when a consultation is cancelled", async () => {
+      prismaMock.consultation.findUnique.mockResolvedValue(CONSULTATION as any);
+      prismaMock.consultation.update.mockResolvedValue({ ...CONSULTATION, status: "CANCELLED" } as any);
+      const res = await request(app).patch(`/api/consultations/${CONSULTATION.id}`)
+        .set("Cookie", authCookie()).send({ status: "CANCELLED" });
+      expect(res.status).toBe(200);
+      expect(sendMailMock).toHaveBeenCalledWith(expect.objectContaining({
+        to: CONSULTATION.email,
+        subject: expect.stringContaining("cancelled"),
+        html: expect.stringContaining("February 1, 2099"),
+      }));
+      expect(sendMailMock.mock.calls[0][0].html).toContain("10:00");
+      expect(sendMailMock.mock.calls[0][0].html).toContain("Arabia Standard Time");
+    });
+
+    it("does not send a second cancellation email for an already cancelled consultation", async () => {
+      const cancelled = { ...CONSULTATION, status: "CANCELLED" };
+      prismaMock.consultation.findUnique.mockResolvedValue(cancelled as any);
+      prismaMock.consultation.update.mockResolvedValue(cancelled as any);
+      const res = await request(app).patch(`/api/consultations/${CONSULTATION.id}`)
+        .set("Cookie", authCookie()).send({ status: "CANCELLED" });
+      expect(res.status).toBe(200);
+      expect(sendMailMock).not.toHaveBeenCalled();
+    });
+
     it("refuses to move a booking onto another live booking", async () => {
       prismaMock.consultation.findUnique.mockResolvedValue(CONSULTATION as any);
       prismaMock.consultation.findMany.mockResolvedValue([{ time: "11:00" }] as any);

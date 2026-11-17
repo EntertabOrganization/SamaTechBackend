@@ -19,7 +19,7 @@ export function consultationConfirmationEmail(params: {
   meetLink: string;
   service?: string | null;
 }): { subject: string; html: string } {
-  const subject = "Your SAMATECHS consultation is booked";
+  const subject = "Your consultation with SAMATECHS is booked";
   const name = escapeHtml(params.name);
   const formattedDate = formatDate(params.date);
   const formattedTime = `${escapeHtml(params.time)} (${timeZoneLabel(params.date)})`;
@@ -39,25 +39,25 @@ export function consultationConfirmationEmail(params: {
           <td style="padding: 20px 24px;">
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
               <tr>
-                <td style="padding: 6px 0; font-size: 14px; color: #666666; width: 110px;">Date</td>
-                <td style="padding: 6px 0; font-size: 14px; color: #0F1B2D; font-weight: 600;">${formattedDate}</td>
+                <td style="padding: 6px 16px 6px 0; font-size: 14px; color: #666666; width: 110px; min-width: 110px; white-space: nowrap;">Date</td>
+                <td style="padding: 6px 0; font-size: 14px; overflow-wrap: anywhere; word-break: break-word; color: #0F1B2D; font-weight: 600;">${formattedDate}</td>
               </tr>
               <tr>
-                <td style="padding: 6px 0; font-size: 14px; color: #666666;">Time</td>
-                <td style="padding: 6px 0; font-size: 14px; color: #0F1B2D; font-weight: 600;">${formattedTime}</td>
+                <td style="padding: 6px 16px 6px 0; font-size: 14px; color: #666666; white-space: nowrap; vertical-align: top;">Time</td>
+                <td style="padding: 6px 0; font-size: 14px; overflow-wrap: anywhere; word-break: break-word; color: #0F1B2D; font-weight: 600;">${formattedTime}</td>
               </tr>
               ${
                 service
                   ? `<tr>
-                <td style="padding: 6px 0; font-size: 14px; color: #666666;">Service</td>
-                <td style="padding: 6px 0; font-size: 14px; color: #0F1B2D; font-weight: 600;">${service}</td>
+                <td style="padding: 6px 16px 6px 0; font-size: 14px; color: #666666; white-space: nowrap; vertical-align: top;">Service</td>
+                <td style="padding: 6px 0; font-size: 14px; overflow-wrap: anywhere; word-break: break-word; color: #0F1B2D; font-weight: 600;">${service}</td>
               </tr>`
                   : ""
               }
               <tr>
-                <td style="padding: 6px 0; font-size: 14px; color: #666666;">Meeting Link</td>
-                <td style="padding: 6px 0; font-size: 14px;">
-                  <a href="${params.meetLink}" style="color: #0078FF; font-weight: 600; text-decoration: none;">${params.meetLink}</a>
+                <td style="padding: 6px 16px 6px 0; font-size: 14px; color: #666666; white-space: nowrap; vertical-align: top;">Meeting Link</td>
+                <td style="padding: 6px 0; font-size: 14px; overflow-wrap: anywhere; word-break: break-word;">
+                  <a href="${escapeHtml(params.meetLink)}" style="color: #0078FF; font-weight: 600; text-decoration: none;">${escapeHtml(params.meetLink)}</a>
                 </td>
               </tr>
             </table>
