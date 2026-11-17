@@ -12,7 +12,8 @@
     "seed": "ts-node prisma/seed.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "google:auth": "ts-node scripts/get-google-refresh-token.ts"
+    "google:auth": "ts-node scripts/get-google-refresh-token.ts",
+    "microsoft:auth": "ts-node scripts/get-microsoft-refresh-token.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

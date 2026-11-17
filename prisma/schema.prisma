@@ -84,3 +84,11 @@ model AvailabilityRule {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+/// Small key/value store for third-party credentials that rotate at runtime
+/// (e.g. the Microsoft OAuth refresh token used to create Teams meetings).
+model IntegrationToken {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}

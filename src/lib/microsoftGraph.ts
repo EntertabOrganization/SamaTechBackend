@@ -1,5 +1,6 @@
 import { SendMailInput } from "./mailer";
 import { CreateMeetingInput } from "./googleCalendar";
+import prisma from "./prisma";
 
 // Microsoft 365 app-only access. The selected mailbox must have an Exchange calendar
 // and (for Teams links) a Teams license.
@@ -120,9 +121,133 @@ async function logCalendarTeamsSupport(): Promise<void> {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Delegated access (acting as the mailbox user via a refresh token).
+// Creating Teams meetings this way needs no Teams "application access policy",
+// which app-only access does. Set up once with `npm run microsoft:auth`.
+// ---------------------------------------------------------------------------
+
+export const MICROSOFT_DELEGATED_SCOPES = "offline_access User.Read OnlineMeetings.ReadWrite";
+const REFRESH_TOKEN_KEY = "microsoft_refresh_token";
+let delegatedToken: { value: string; expiresAt: number } | undefined;
+
+// Microsoft rotates refresh tokens on every use and each one only lives ~90 days,
+// so the newest one is kept in the database. Env is the initial seed.
+async function loadStoredRefreshToken(): Promise<string | undefined> {
+  try {
+    const row = await prisma.integrationToken.findUnique({ where: { key: REFRESH_TOKEN_KEY } });
+    return row?.value;
+  } catch (err) {
+    console.warn("[microsoft] Could not read stored refresh token:", (err as Error).message);
+    return undefined;
+  }
+}
+
+async function saveRefreshToken(value: string): Promise<void> {
+  try {
+    await prisma.integrationToken.upsert({
+      where: { key: REFRESH_TOKEN_KEY },
+      create: { key: REFRESH_TOKEN_KEY, value },
+      update: { value },
+    });
+  } catch (err) {
+    console.warn("[microsoft] Could not store rotated refresh token:", (err as Error).message);
+  }
+}
+
+async function redeemRefreshToken(refreshToken: string): Promise<{ access_token: string; expires_in: number; refresh_token?: string }> {
+  const cfg = getConfig();
+  const response = await fetch(`https://login.microsoftonline.com/${encodeURIComponent(cfg.MICROSOFT_TENANT_ID)}/oauth2/v2.0/token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      client_id: cfg.MICROSOFT_CLIENT_ID,
+      client_secret: cfg.MICROSOFT_CLIENT_SECRET,
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+      scope: MICROSOFT_DELEGATED_SCOPES,
+    }),
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({})) as { error?: string; error_description?: string };
+    throw new Error(`Microsoft refresh token rejected (${response.status} ${err.error ?? ""}): ${(err.error_description ?? "").split("\r\n")[0]}`);
+  }
+  return response.json() as any;
+}
+
+async function getDelegatedToken(): Promise<string> {
+  if (delegatedToken && delegatedToken.expiresAt > Date.now() + 60000) return delegatedToken.value;
+
+  const envToken = process.env.MICROSOFT_REFRESH_TOKEN;
+  const stored = await loadStoredRefreshToken();
+  // Try the newest (stored) token first; fall back to env, e.g. right after re-running microsoft:auth.
+  const candidates = [...new Set([stored, envToken].filter((t): t is string => !!t))];
+  if (candidates.length === 0) throw new Error("MICROSOFT_REFRESH_TOKEN is not configured");
+
+  let lastError: unknown;
+  for (const candidate of candidates) {
+    try {
+      const token = await redeemRefreshToken(candidate);
+      delegatedToken = { value: token.access_token, expiresAt: Date.now() + token.expires_in * 1000 };
+      if (token.refresh_token && token.refresh_token !== stored) await saveRefreshToken(token.refresh_token);
+      return delegatedToken.value;
+    } catch (err) {
+      lastError = err;
+    }
+  }
+  throw lastError;
+}
+
+async function createDelegatedTeamsMeeting(startTime: Date, end: Date, subject: string): Promise<string | null> {
+  const token = await getDelegatedToken();
+  const response = await fetch("https://graph.microsoft.com/v1.0/me/onlineMeetings", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ startDateTime: startTime.toISOString(), endDateTime: end.toISOString(), subject }),
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({})) as { error?: { code?: string; message?: string } };
+    throw new Error(`POST /me/onlineMeetings failed (${response.status} ${err.error?.code ?? ""}): ${err.error?.message ?? ""}`);
+  }
+  const meeting = await response.json() as { joinWebUrl?: string; joinUrl?: string };
+  return meeting.joinWebUrl || meeting.joinUrl || null;
+}
+
+/** Calendar event (app-only) that carries an already-created Teams link. */
+async function createEventWithLink(input: CreateMeetingInput, end: Date, joinUrl: string): Promise<void> {
+  try {
+    await graphRequest("/events", {
+      subject: input.summary,
+      body: {
+        contentType: "HTML",
+        content: `${input.description ?? ""}<p><strong>Microsoft Teams meeting:</strong> <a href="${joinUrl}">${joinUrl}</a></p>`,
+      },
+      start: { dateTime: input.startTime.toISOString(), timeZone: "UTC" },
+      end: { dateTime: end.toISOString(), timeZone: "UTC" },
+      location: { displayName: "Microsoft Teams Meeting" },
+    });
+  } catch (err) {
+    console.warn("[microsoft] Teams meeting created but calendar event failed:", (err as Error).message);
+  }
+}
+
 export async function createMicrosoftMeeting(input: CreateMeetingInput): Promise<string | null> {
   if (process.env.NODE_ENV === "test") return null;
   const end = new Date(input.startTime.getTime() + (input.durationMinutes ?? 30) * 60000);
+
+  if (process.env.MICROSOFT_REFRESH_TOKEN) {
+    try {
+      const joinUrl = await createDelegatedTeamsMeeting(input.startTime, end, input.summary);
+      if (joinUrl) {
+        await createEventWithLink(input, end, joinUrl);
+        return joinUrl;
+      }
+    } catch (err) {
+      console.warn("[microsoft] Delegated Teams meeting failed, trying app-only:", (err as Error).message);
+    }
+  }
 
   let event: any;
   try {
